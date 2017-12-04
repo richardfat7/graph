@@ -220,7 +220,7 @@ void installSkyboxShaders()
 		return;
 
 	SkyboxprogramID = glCreateProgram();
-	glAttachShader(SkyboxprogramID, SkyboxprogramID);
+	glAttachShader(SkyboxprogramID, SkyboxvertexShaderID);
 	glAttachShader(SkyboxprogramID, SkyboxfragmentShaderID);
 	glLinkProgram(SkyboxprogramID);
 
@@ -479,7 +479,7 @@ GLuint loadCubemap(vector<const GLchar*> faces) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return textureID;
 }
 
@@ -725,12 +725,12 @@ void sendDataToOpenGL()
 
 	
 	vector<const GLchar*> Skybox_faces;
-	Skybox_faces.push_back("skybox/right.bmp");
-	Skybox_faces.push_back("skybox/left.bmp");
-	Skybox_faces.push_back("skybox/top.bmp");
-	Skybox_faces.push_back("skybox/bottom.bmp");
-	Skybox_faces.push_back("skybox/back.bmp");
-	Skybox_faces.push_back("skybox/front.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/right.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/left.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/top.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/bottom.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/back.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/front.bmp");
 	Texture[0] = loadCubemap(Skybox_faces);
 
 }
@@ -783,10 +783,12 @@ void paintGL(void)
 	glUseProgram(SkyboxprogramID);
 
 	GLuint Skb_ModelUniformLocation = glGetUniformLocation(SkyboxprogramID, "M");
-	glm::mat4 Skb_ModelMatrix = glm::mat4(1.0f);
+	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
 	//remove any translation component of the view matrix
-	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-	glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth / (float)screenWidth, 0.1f, 100.0f);
+	//glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+	//glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth / (float)screenWidth, 0.1f, 100.0f);
+	glm::mat4 view = glm::mat4(glm::mat3(0.0f));
+	glm::mat4 projection = glm::perspective(1.0f, 1.0f, 0.1f, 100.0f);
 
 	glUniformMatrix4fv(Skb_ModelUniformLocation, 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &view[0][0]);
@@ -795,14 +797,15 @@ void paintGL(void)
 	//skybox cube
 	glBindVertexArray(vaoSkybox);
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(SkyboxprogramID, "skybox"), 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture[0]);
+	glUniform1i(glGetUniformLocation(SkyboxprogramID, "skybox"), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 
-
+/*
 	glUseProgram(programID);
 
 	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
@@ -860,56 +863,56 @@ void paintGL(void)
 	glUniform1f(sd, spe);
 
 	//lamp
-	glBindVertexArray(vaoID0);
+	//glBindVertexArray(vaoID0);
 
 
-	modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -7.0f, -34.0f));
+	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -7.0f, -34.0f));
 
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.0f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.0f, glm::vec3(0, 1, 0));
+	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture[1]);
-	glUniform1i(textureID, 0);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, Texture[1]);
+	//glUniform1i(textureID, 0);
+	//glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
 
 	//
 	//car
-	glBindVertexArray(vaoID1);
-	modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(7.0f, -8.0f, -30.0f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	//glBindVertexArray(vaoID1);
+	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(7.0f, -8.0f, -30.0f));
+	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
+	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	glUniform1i(textureID, 1);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, Texture[2]);
+	//glUniform1i(textureID, 1);
+	//glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
 
 	//moon
-	glBindVertexArray(vaoID2);
-	modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(20.0f, 30.0f, -80.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.05f, 0.05f, 0.05f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(0, 0, 1));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	//glBindVertexArray(vaoID2);
+	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(20.0f, 30.0f, -80.0f));
+	//modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.05f, 0.05f, 0.05f));
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(0, 0, 1));
+	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Texture[3]);
-	glUniform1i(textureID, 2);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_2D, Texture[3]);
+	//glUniform1i(textureID, 2);
+	//glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
 
 
 	//plane
-	glBindVertexArray(vaoID3);
-	modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -10.0f, -27.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	//glBindVertexArray(vaoID3);
+	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -10.0f, -27.0f));
+	//modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
+	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, Texture[4]);
-	glUniform1i(textureID, 3);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
+	//glActiveTexture(GL_TEXTURE3);
+	//glBindTexture(GL_TEXTURE_2D, Texture[4]);
+	//glUniform1i(textureID, 3);
+	//glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
 
 
 	//slamp
@@ -923,9 +926,9 @@ void paintGL(void)
 	glBindTexture(GL_TEXTURE_2D, Texture[5]);
 	glUniform1i(textureID, 4);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
-
+*/
 /*#######################################################Particle###############################################*/
-
+/*
 	glUseProgram(programID2);
 	viewMatrixUniformLocation = glGetUniformLocation(programID2, "viewMatrix");
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
@@ -1036,7 +1039,7 @@ void paintGL(void)
 								 // This is equivalent to :
 								 // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, parcnt);
-
+*/
 /*###########################################################Particle####################################################*/
 
 	glFlush();

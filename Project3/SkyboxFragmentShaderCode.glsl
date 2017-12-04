@@ -1,11 +1,12 @@
 #version 440
-in vec2 UV;
-in vec4 particlecolor;
+in vec3 TexCoords;
+in float visibility;
 
 out vec4 color;
 
-uniform sampler2D myTextureSampler;
+uniform samplerCube skybox;
 
 void main(){
-	color = particlecolor;
+	color = vec4(texture(skybox, TexCoords).rgb, 1.0f);
+	color = vec4(0.0f, 1.0f, 0.0f, 0.5f);
 }
