@@ -204,10 +204,10 @@ void installSkyboxShaders()
 	GLuint SkyboxfragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
 	const GLchar* adapter[1];
-	string temp = readShaderCode("SkyboxVertexShaderCode2.glsl");
+	string temp = readShaderCode("SkyboxVertexShaderCode.glsl");
 	adapter[0] = temp.c_str();
 	glShaderSource(SkyboxvertexShaderID, 1, adapter, 0);
-	temp = readShaderCode("SkyboxFragmentShaderCode2.glsl");
+	temp = readShaderCode("SkyboxFragmentShaderCode.glsl");
 	adapter[0] = temp.c_str();
 	glShaderSource(SkyboxfragmentShaderID, 1, adapter, 0);
 
