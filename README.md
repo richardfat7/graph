@@ -1,48 +1,48 @@
 Basic Requirements:
 You should accomplish the following goals to get the basic points.
 
-1. Create 3 planets (A, B, C), 1 light source box (E) and 1 space vehicle (D), and place them properly. Keep the
+- [ ] Create 3 planets (A, B, C), 1 light source box (E) and 1 space vehicle (D), and place them properly. Keep the
 aspect ratio of the scene correct when we change the window size with “glutReshapeFunc” function. You can
 load any possible objects or images as your planets, vehicle.
 
-2. Create a Skybox (H) as the background and it should rotate accordingly when you change viewpoint and look
+- [ ] Create a Skybox (H) as the background and it should rotate accordingly when you change viewpoint and look
 around the Universe. No translation and zoom should happen for Skybox.
 
-3. Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
+- [ ] Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
 floating rocks should have random sizes and locations in a limited range.
 
-4. Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
+- [ ] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
 vehicle D and every rock in G; Conduct multiple texture mapping for planet C. Textures used for A, B, C, D
 and G should be different from each other. You can use any texture you like, even a chocolate or strawberry.
 
-5. Basic light rendering (ambient, diffuse and specular) should be obviously observed on A, B, C, D and G.
+- [ ] Basic light rendering (ambient, diffuse and specular) should be obviously observed on A, B, C, D and G.
 Please properly set your lighting parameters for clear demonstration. Keyboard interaction is allowed for you
 to tune parameters during demonstration.
 
-6. For planet A and C, they should do self-rotation all the time. For planet B, it should move around A at a
+- [ ] For planet A and C, they should do self-rotation all the time. For planet B, it should move around A at a
 designed orbit (circle or other forms as you like). Also, B should have a self-rotation at the same time, just
 like what moon does against earth.
 
-7. For light source E, it should move around the center of the universe. It could be better if you can make this
+- [ ] For light source E, it should move around the center of the universe. It could be better if you can make this
 movement periodically, just like sunrise and sunset. Here, we represent and visualize the light source with a
 box at the light position. Basically, only pure color is required for the light source.
 
-8. For space vehicle D, it should basically move around A at a designed orbit.
+- [ ] For space vehicle D, it should basically move around A at a designed orbit.
 
-9. For asteroid ring cloud G, all the floating rocks in it should move around planet C simultaneously.
+- [ ] For asteroid ring cloud G, all the floating rocks in it should move around planet C simultaneously.
 
-10. For viewpoint switch, at least 3 distinctive viewpoints (such as –X, +X, +Y axis) should be provided as
+- [ ] For viewpoint switch, at least 3 distinctive viewpoints (such as –X, +X, +Y axis) should be provided as
 choices so that we can explore your Universe from different aspects.
 
-11. Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
+- [ ] Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
 
-12. Graphical User Interface. A GUI should be created with the GLUI Library (similar as the figure shows)
+- [ ] Graphical User Interface. A GUI should be created with the GLUI Library (similar as the figure shows)
 which includes the module:
 (a) A spinner to control the speed of vehicle.
 (b) A radio group to set viewpoint.
 (c) A checkbox to turn on/off fog effect, a radio group to set fog color.
 
-13. For interaction:
+- [ ] For interaction:
 a) Keyboard. Please set lower case ‘a’, ‘s’, ‘d’ as switch between 3 different viewpoints.
 b) Real-time speed and orbit control. Please set the up and down arrow keys to control the speed of the
 space vehicle. Left and right arrow keys to increase/decrease the orbit radius size of the space vehicle.
