@@ -1,0 +1,72 @@
+#version 440
+
+in vec2 UV;
+in vec4 AmbLightCol1;
+in vec3 normalWorld;
+in vec3 vertexPositionWorld;
+
+uniform vec3 lightPositionWorld1;
+uniform vec3 lightPositionWorld2;
+uniform vec3 lightPositionWorldr;
+uniform vec3 lightPositionWorldy;
+uniform vec3 lightPositionWorldg;
+uniform vec3 eyePositionWorld;
+uniform sampler2D myTextureSampler;
+uniform float difdelta1;
+uniform float difdeltar;
+uniform float difdeltay;
+uniform float difdeltag;
+uniform float spedelta;
+
+out vec4 finalColor;
+
+void main()
+{
+	
+
+	vec3 lightVectorWorld1 = normalize(lightPositionWorld1 - vertexPositionWorld);
+	float brightness = dot(lightVectorWorld1, normalize(normalWorld));
+	vec4 DifBrightness1 = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+	vec4 DifLightCol1 = vec4(1.0f, 1.0f , 1.0f, 1.0f);
+
+	vec3 lightVectorWorld2 = normalize(lightPositionWorld2 - vertexPositionWorld);
+	brightness = dot(lightVectorWorld2, normalize(normalWorld));
+	vec4 DifBrightness2 = vec4(brightness, brightness, brightness, 1.0f);
+	float Diflightrgb2 = clamp(0.0f + difdelta1, 0 , 1); 
+	vec4 DifLightCol2 = vec4(Diflightrgb2, Diflightrgb2 , Diflightrgb2, 1.0f);
+
+	vec3 lightVectorWorldr = normalize(lightPositionWorldr - vertexPositionWorld);
+	brightness = dot(lightVectorWorldr, normalize(normalWorld));
+	vec4 DifBrightnessr = vec4(brightness, brightness, brightness, 1.0f);
+	float Diflightrgbr = clamp(0.0f + difdeltar, 0 , 0.5); 
+	vec4 DifLightColr = vec4(Diflightrgbr, 0.0f,0.0f, 1.0f);
+
+	vec3 lightVectorWorldy = normalize(lightPositionWorldy - vertexPositionWorld);
+	brightness = dot(lightVectorWorldy, normalize(normalWorld));
+	vec4 DifBrightnessy = vec4(brightness, brightness, brightness, 1.0f);
+	float Diflightrgby = clamp(0.0f + difdeltay, 0 , 0.5); 
+	vec4 DifLightColy = vec4(Diflightrgby, Diflightrgby ,0.0f, 1.0f);
+
+	vec3 lightVectorWorldg = normalize(lightPositionWorldg - vertexPositionWorld);
+	brightness = dot(lightVectorWorldg, normalize(normalWorld));
+	vec4 DifBrightnessg = vec4(brightness, brightness, brightness, 1.0f);
+	float Diflightrgbg = clamp(0.0f + difdeltag, 0 , 0.5); 
+	vec4 DifLightColg = vec4(0.0f, Diflightrgbg ,0.0f, 1.0f);
+
+	vec3 reflectedLightVectorWorld = normalize (reflect (-lightVectorWorld2, normalWorld));
+	vec3 eyeVectorWorld = normalize (eyePositionWorld - vertexPositionWorld);
+	float SpeBrightness = clamp(dot(reflectedLightVectorWorld, eyeVectorWorld), 0 ,1);
+	vec4 SpeLightCol = vec4(0.1f + spedelta ,0.1f + spedelta , 0.1f + spedelta , 1.0f);
+
+	vec4 MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
+	vec4 MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
+	vec4 MatSpeCol = vec4(0.3f, 0.3f, 0.3f, 1.0f);
+
+	finalColor = MatAmbCol * AmbLightCol1 +
+				 MatDifCol * DifLightCol1 * DifBrightness1 +
+				 MatDifCol * DifLightCol2 * DifBrightness2 +
+				 MatDifCol * DifLightColr * DifBrightnessr +
+				 MatDifCol * DifLightColy * DifBrightnessy +
+				 MatDifCol * DifLightColg * DifBrightnessg +
+				 MatSpeCol * SpeLightCol * pow(SpeBrightness,50);
+}

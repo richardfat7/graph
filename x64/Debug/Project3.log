@@ -1,0 +1,9 @@
+﻿  main.cpp
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(684): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(698): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(710): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(722): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(735): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\visual studio 2015\projects\project3\project3\main.cpp(785): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+  Project3.vcxproj -> c:\users\hei\documents\visual studio 2015\Projects\Project3\x64\Debug\Project3.exe
+  Project3.vcxproj -> c:\users\hei\documents\visual studio 2015\Projects\Project3\x64\Debug\Project3.pdb (Partial PDB)
