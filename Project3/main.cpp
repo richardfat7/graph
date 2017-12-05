@@ -278,6 +278,15 @@ void PassiveMouse(int x, int y)
 	ypos = y;
 }
 
+void MouseWheel(int button, int state, int x, int y) {
+	//if (button == 3 || button == 4) {
+		//if (state == GLUT_UP) return;
+		//if (button == 3) camera_fov = max(44.1f, camera_fov - 0.001f);
+		//else camera_fov = min(44.9f, camera_fov + 0.001f);
+	//}
+}
+
+
 bool loadOBJ(
 	const char * path,
 	std::vector<glm::vec3> & out_vertices,
@@ -725,12 +734,12 @@ void sendDataToOpenGL()
 
 	
 	vector<const GLchar*> Skybox_faces;
-	Skybox_faces.push_back("skybox/right.bmp");
-	Skybox_faces.push_back("skybox/left.bmp");
-	Skybox_faces.push_back("skybox/top.bmp");
-	Skybox_faces.push_back("skybox/bottom.bmp");
-	Skybox_faces.push_back("skybox/back.bmp");
-	Skybox_faces.push_back("skybox/front.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/right.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/left.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/top.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/bottom.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/back.bmp");
+	Skybox_faces.push_back("texture/skycity_skybox/front.bmp");
 	Texture[0] = loadCubemap(Skybox_faces);
 
 }
@@ -785,8 +794,9 @@ void paintGL(void)
 	GLuint Skb_ModelUniformLocation = glGetUniformLocation(SkyboxprogramID, "M");
 	glm::mat4 Skb_ModelMatrix = glm::mat4(1.0f);
 	//remove any translation component of the view matrix
-	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-	glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth / (float)screenWidth, 0.1f, 100.0f);
+	glm::mat4 view = viewMatrix;//glm::mat4(glm::mat3(camera.GetViewMatrix()));
+	//glm::mat4 projection = glm::perspective(camera.Zoom, (float)vp[2] / (float)vp[3], 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(1.0f, (float)vp[2] / vp[3], 5.0f, 100.0f);
 
 	glUniformMatrix4fv(Skb_ModelUniformLocation, 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &view[0][0]);
