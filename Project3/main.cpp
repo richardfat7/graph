@@ -902,7 +902,7 @@ void paintGL(void)
 	glUniform1i(textureID, 1);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	glUniform1i(textureID, 2);
+	glUniform1i(textureID2, 2);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
 
 	normalMapping_flag = false;

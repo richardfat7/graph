@@ -1,10 +1,10 @@
 #version 440
 
 in vec2 UV;
-in vec4 AmbLightCol1;
 in vec3 normalWorld;
 in vec3 vertexPositionWorld;
 
+uniform vec4 ambientLight1;
 uniform vec3 lightPositionWorld1;
 uniform vec3 lightPositionWorld2;
 uniform vec3 lightPositionWorldr;
@@ -30,6 +30,9 @@ void main()
 		normal = texture(myTextureSampler2, UV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);
 	}
+
+	
+	vec4 AmbLightCol1 = ambientLight1;
 
 	vec3 lightVectorWorld1 = normalize(lightPositionWorld1 - vertexPositionWorld);
 	float brightness = dot(lightVectorWorld1, normal);
@@ -69,7 +72,7 @@ void main()
 	vec4 MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
 	vec4 MatSpeCol = vec4(0.3f, 0.3f, 0.3f, 1.0f);
 
-	finalColor = MatAmbCol * AmbLightCol1 +
+	finalColor = MatAmbCol * AmbLightCol1+
 				 MatDifCol * DifLightCol1 * DifBrightness1 +
 				 MatDifCol * DifLightCol2 * DifBrightness2 +
 				 MatDifCol * DifLightColr * DifBrightnessr +

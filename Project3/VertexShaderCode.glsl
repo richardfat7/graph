@@ -4,13 +4,12 @@ in layout(location=0) vec3 position;
 in layout(location=1) vec2 vertexUV;
 in layout(location=2) vec3 normal;
 
-uniform vec4 ambientLight1;
+
 uniform mat4 modelTransformMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 out vec2 UV;
-out vec4 AmbLightCol1;
 out vec3 normalWorld;
 out vec3 vertexPositionWorld;
 
@@ -25,5 +24,4 @@ void main()
 	normalWorld = normal_temp.xyz;
 	vertexPositionWorld = new_position.xyz;
 	UV = vertexUV;
-	AmbLightCol1 = ambientLight1;
 }
