@@ -9,7 +9,7 @@ uniform mat4 M;
 uniform bool fog;
 
 void main(){
-	vec4 pos = projection * view * vec4(position, 1.0f);
+	vec4 pos = projection * view * M * vec4(position, 1.0f);
 	gl_Position = pos;
 
 	TexCoords = position;
