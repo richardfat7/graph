@@ -73,13 +73,17 @@ encouraged to explore the amazing instanced rendering. Code of instancing will b
 environment mapping, displacement mapping etc. (7 points)
 7. Play background music with IrrKlang Library. (2 points)
 
-index	vao	texture
+index		texture
 ---------------------------------------
-0	skybox		skybox
-1	earth (planet)	earth
-2			earth_normal
-3	moon (planet)	moon
-4	planet (planet)	planetT1
-5			planetT2
+SB	skybox (vaoSB)	skybox  0
+1	earth (vao0)	earth 21
+			earth_normal 2
+1	moon (vao0)	moon 3
+1	planet (vao0)	planetT1 4
+			planetT2 5 
+2	rock (vao1)	starfy 6
+0	lightbox (vaoSB)	lightbox 7
+3	plane		/
+4	starfy (vao4)	/ 9
 
 

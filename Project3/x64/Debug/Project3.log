@@ -1,10 +1,11 @@
 ﻿  main.cpp
-c:\users\hei\documents\graph\project3\main.cpp(567): warning C4101: 'vboID2': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(825): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(914): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(567): warning C4101: 'vboID4': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(801): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(890): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(906): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(930): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(954): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(969): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(997): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(945): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(960): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(985): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.exe
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.pdb (Partial PDB)

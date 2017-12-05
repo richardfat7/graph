@@ -23,7 +23,7 @@ using glm::mat4;
 GLuint programID, programID2, SkyboxprogramID;
 size_t drawSize[10];
 // Could define the Vao&Vbo and interaction parameter here
-GLuint vaoID0, vaoID1, vaoID2, vaoID3, vaoID4, vaoSkybox, Texture[10];
+GLuint vaoID0, vaoID1, vaoID2, vaoID3, vaoID4, vaoID5, vaoID6, vaoID7, vaoSkybox, Texture[10];
 GLuint oldtime = 0;
 GLfloat xangle = 3.14f, yangle = 0.0f;
 int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1;
@@ -624,14 +624,14 @@ void sendDataToOpenGL()
 	drawSize[2] = vertices[1].size();
 	//load texture and remember texture ID for paintGL function
 
-	/*
-	res = loadOBJ("obj/planet.obj", vertices[2], uvs[2], normals[2]);
+	//plane fumfumfum
+	res = loadOBJ("obj/Arc170.obj", vertices[2], uvs[2], normals[2]);
 	//GLuint vaoID1; (throw out!!)
 	glGenVertexArrays(1, &vaoID2);
 	glBindVertexArray(vaoID2);  //first VAO
 								
 	glGenBuffers(1, &vboID2);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
+	glBindBuffer(GL_ARRAY_BUFFER,vboID2);
 	glBufferData(GL_ARRAY_BUFFER, vertices[2].size() * sizeof(glm::vec3), &vertices[2][0], GL_STATIC_DRAW);
 	//vertex position
 	glEnableVertexAttribArray(0);
@@ -653,17 +653,14 @@ void sendDataToOpenGL()
 	drawSize[3] = vertices[2].size();
 	//load texture and remember texture ID for paintGL function
 
-	Texture[3] = loadBMP_custom("oldtexture/moon.bmp");
-	*/
-
-
-	res = loadOBJ("obj/Arc170.obj", vertices[3], uvs[3], normals[3]);
+	//starfy
+	res = loadOBJ("obj/starfy.obj", vertices[3], uvs[3], normals[3]);
 	//GLuint vaoID1; (throw out!!)
 	glGenVertexArrays(1, &vaoID3);
 	glBindVertexArray(vaoID3);  //first VAO
-								
+
 	glGenBuffers(1, &vboID3);
-	glBindBuffer(GL_ARRAY_BUFFER,vboID3);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
 	glBufferData(GL_ARRAY_BUFFER, vertices[3].size() * sizeof(glm::vec3), &vertices[3][0], GL_STATIC_DRAW);
 	//vertex position
 	glEnableVertexAttribArray(0);
@@ -682,47 +679,26 @@ void sendDataToOpenGL()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	//remember the drawSize for paintGL function
-	drawSize[3] = vertices[3].size();
-	//load texture and remember texture ID for paintGL function
-
-	res = loadOBJ("obj/starfy.obj", vertices[4], uvs[4], normals[4]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID4);
-	glBindVertexArray(vaoID4);  //first VAO
-
-	glGenBuffers(1, &vboID4);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID4);
-	glBufferData(GL_ARRAY_BUFFER, vertices[4].size() * sizeof(glm::vec3), &vertices[4][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[4].size() * sizeof(glm::vec2), &uvs[4][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[4].size() * sizeof(glm::vec3), &normals[4][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//remember the drawSize for paintGL function
-	drawSize[4] = vertices[4].size();
+	drawSize[4] = vertices[3].size();
 	//load texture and remember texture ID for paintGL function
 
 	//drawsize[1] earth
 	Texture[1] = loadBMP_custom("texture/earth.bmp");
 	Texture[2] = loadBMP_custom("normal_map/earth_normal.bmp");
-	//drawsize[2] moon
+	//drawsize[1] moon
 	Texture[3] = loadBMP_custom("oldtexture/moon.bmp");
-	//drawsize[3] sun
+	//drawsize[1] sun
 	Texture[4] = loadBMP_custom("texture/sun.bmp");
 	Texture[5] = loadBMP_custom("texture/apple.bmp");
+	//drawsize[2] rock
+	Texture[6] = loadBMP_custom("texture/helicopter.bmp");
+	//drawsize[0] lightbox
+	Texture[7] = loadBMP_custom("texture/lightbox.bmp");
+	//drawsize[3] plane
+	Texture[8] = loadBMP_custom("texture/helicopter.bmp");
 	//drawsize[4] starfy
-	Texture[6] = loadBMP_custom("texture/starfy.bmp");
+	Texture[9] = loadBMP_custom("texture/starfy.bmp");
+
 
 /*#####################################Particle##############################################*/
 	glGenVertexArrays(1, &ppVao);
@@ -951,10 +927,10 @@ void paintGL(void)
 	multiMapping_flag = false;
 	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
 
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
 
 	//
-	//car
+	//rock
 	glBindVertexArray(vaoID1);
 	modelTransformMatrix = glm::mat4();
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
@@ -963,13 +939,25 @@ void paintGL(void)
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	glUniform1i(textureID, 4);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, Texture[6]);
+	glUniform1i(textureID, 6);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
 
 
+	//lightbox
+	glBindVertexArray(vaoSkybox);
+	modelTransformMatrix = glm::mat4();
+	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
+	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, Texture[7]);
+	glUniform1i(textureID, 7);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[0]);
 	//plane
 	//glBindVertexArray(vaoID3);
 	//modelTransformMatrix = glm::mat4();
@@ -982,9 +970,9 @@ void paintGL(void)
 	//glUniform1i(textureID, 3);
 	//glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
 
-
-	//slamp
-	glBindVertexArray(vaoID4);
+	
+	//starvy
+	glBindVertexArray(vaoID3);
 	modelTransformMatrix = glm::mat4();
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(10.0f, -8.0f, -40.0f));
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.8f, 1.2f, 1.0f));
@@ -992,9 +980,9 @@ void paintGL(void)
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, Texture[5]);
-	glUniform1i(textureID, 5);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
+	glBindTexture(GL_TEXTURE_2D, Texture[9]);
+	glUniform1i(textureID, 9);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
 
 /*#######################################################Particle###############################################*/
 /*
