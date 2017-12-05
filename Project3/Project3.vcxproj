@@ -21,6 +21,8 @@
   <ItemGroup>
     <None Include="FragmentShaderCode.glsl" />
     <None Include="FragmentShaderCode2.glsl" />
+    <None Include="SkyboxFragmentShaderCode.glsl" />
+    <None Include="SkyboxVertexShaderCode.glsl" />
     <None Include="VertexShaderCode.glsl" />
     <None Include="VertexShaderCode2.glsl" />
   </ItemGroup>

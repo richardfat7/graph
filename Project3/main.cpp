@@ -21,7 +21,7 @@ using glm::vec3;
 using glm::mat4;
 
 GLuint programID, programID2, SkyboxprogramID;
-size_t drawSize[5];
+size_t drawSize[10];
 // Could define the Vao&Vbo and interaction parameter here
 GLuint vaoID0, vaoID1, vaoID2, vaoID3, vaoID4, vaoSkybox, Texture[10];
 GLuint oldtime = 0;
@@ -551,7 +551,15 @@ void sendDataToOpenGL()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	//drawSize[0] = GLint(sizeof(skyboxVertices));
+	drawSize[0] = GLint(sizeof(skyboxVertices));
+	vector<const GLchar*> Skybox_faces;
+	Skybox_faces.push_back("texture/universe_skybox/right.bmp");
+	Skybox_faces.push_back("texture/universe_skybox/left.bmp");
+	Skybox_faces.push_back("texture/universe_skybox/top.bmp");
+	Skybox_faces.push_back("texture/universe_skybox/bottom.bmp");
+	Skybox_faces.push_back("texture/universe_skybox/back.bmp");
+	Skybox_faces.push_back("texture/universe_skybox/front.bmp");
+	Texture[0] = loadCubemap(Skybox_faces);
 
 	std::vector<glm::vec3> vertices[5];
 	std::vector<glm::vec2> uvs[5];
@@ -585,10 +593,11 @@ void sendDataToOpenGL()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	drawSize[1] = vertices[0].size();
-	Texture[1] = loadBMP_custom("oldtexture/lamp_texture.bmp");
+	Texture[1] = loadBMP_custom("texture/earth.bmp");
+	Texture[2] = loadBMP_custom("normal_map/earth_normal.bmp");
 
 
-	res = loadOBJ("obj/Car_porsche.obj", vertices[1], uvs[1], normals[1]);
+	res = loadOBJ("obj/rock.obj", vertices[1], uvs[1], normals[1]);
 	//res = loadOBJ("plane.obj", vertices[1], uvs[1], normals[1]);
 	//GLuint vaoID1; (throw out!!)
 	glGenVertexArrays(1, &vaoID1);
@@ -614,12 +623,12 @@ void sendDataToOpenGL()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	//remember the drawSize for paintGL function
-	drawSize[2] = vertices[1].size();
+	drawSize[3] = vertices[1].size();
 	//load texture and remember texture ID for paintGL function
-	Texture[2] = loadBMP_custom("oldtexture/car_texture.bmp");
+	Texture[3] = loadBMP_custom("oldtexture/lamp_texture.bmp");
 
-
-	res = loadOBJ("obj/B-2_Spirit.obj", vertices[2], uvs[2], normals[2]);
+	/*
+	res = loadOBJ("obj/planet.obj", vertices[2], uvs[2], normals[2]);
 	//GLuint vaoID1; (throw out!!)
 	glGenVertexArrays(1, &vaoID2);
 	glBindVertexArray(vaoID2);  //first VAO
@@ -647,6 +656,7 @@ void sendDataToOpenGL()
 	drawSize[3] = vertices[2].size();
 	//load texture and remember texture ID for paintGL function
 	Texture[3] = loadBMP_custom("oldtexture/moon.bmp");
+	*/
 
 
 	res = loadOBJ("obj/Arc170.obj", vertices[3], uvs[3], normals[3]);
@@ -705,7 +715,7 @@ void sendDataToOpenGL()
 	//remember the drawSize for paintGL function
 	drawSize[5] = vertices[4].size();
 	//load texture and remember texture ID for paintGL function
-	Texture[5] = loadBMP_custom("oldtexture/slamp_texture.bmp");
+	Texture[5] = loadBMP_custom("texture/starfy.bmp");
 
 /*#####################################Particle##############################################*/
 	glGenVertexArrays(1, &ppVao);
@@ -733,14 +743,7 @@ void sendDataToOpenGL()
 	glBufferData(GL_ARRAY_BUFFER, maxnopar * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
 
 	
-	vector<const GLchar*> Skybox_faces;
-	Skybox_faces.push_back("texture/skycity_skybox/right.bmp");
-	Skybox_faces.push_back("texture/skycity_skybox/left.bmp");
-	Skybox_faces.push_back("texture/skycity_skybox/top.bmp");
-	Skybox_faces.push_back("texture/skycity_skybox/bottom.bmp");
-	Skybox_faces.push_back("texture/skycity_skybox/back.bmp");
-	Skybox_faces.push_back("texture/skycity_skybox/front.bmp");
-	Texture[0] = loadCubemap(Skybox_faces);
+
 
 }
 
@@ -789,39 +792,40 @@ void paintGL(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
+
+	glm::mat4 projectionMatrix = glm::perspective(2.0f, (float)vp[2] / vp[3], 1.0f, 100.0f);
+
 	glUseProgram(SkyboxprogramID);
 
-	GLuint Skb_ModelUniformLocation = glGetUniformLocation(SkyboxprogramID, "M");
-	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f));
 	//remove any translation component of the view matrix
 	//glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 	//glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth / (float)screenWidth, 0.1f, 100.0f);
-	glm::mat4 view = glm::mat4(glm::mat3(0.0f));
-	glm::mat4 projection = glm::perspective(1.0f, 1.0f, 0.1f, 100.0f);
+	//glm::mat4 view = viewMatrix;//glm::mat4(glm::mat3(0.0f));
+	//glm::mat4 projection = glm::perspective(1.0f, 1.0f, 0.1f, 100.0f);
 
 
-	glUniformMatrix4fv(Skb_ModelUniformLocation, 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "projection"), 1, GL_FALSE, &projection[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "M"), 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &viewMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "projection"), 1, GL_FALSE, &projectionMatrix[0][0]);
 	
 	//skybox cube
 	glBindVertexArray(vaoSkybox);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture[0]);
 	glUniform1i(glGetUniformLocation(SkyboxprogramID, "skybox"), 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture[0]);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[0]);
 
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 
-/*
+
 	glUseProgram(programID);
 
 	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	glm::mat4 Matrix = glm::mat4(1.0f);
-	glm::mat4 projectionMatrix = glm::perspective(1.0f, (float)vp[2] / vp[3], 5.0f, 100.0f);
 	glm::vec4 ambientLight1(0.05f, 0.05f, 0.05f, 1.0f);
 	glm::vec3 lightPosition1(0.0f, 30.0f, -10.0f);
 	glm::vec3 lightPosition2(5.5f, 3.0f, -30.5f);
@@ -830,6 +834,8 @@ void paintGL(void)
 	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
 	glm::vec3 lightPositiong(-4.0, 9.4f, -22.0f);
 	glm::vec3 eyePosition(0.0f, 0.0f, 0.0f);
+
+	bool normalMapping_flag = 0;
 
 	GLint modelTransformMatrixUniformLocation = glGetUniformLocation(programID, "modelTransformMatrix");
 	GLint projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");
@@ -843,11 +849,14 @@ void paintGL(void)
 	GLuint lightPositionyUniformLocation = glGetUniformLocation(programID, "lightPositionWorldy");
 	GLuint lightPositiongUniformLocation = glGetUniformLocation(programID, "lightPositionWorldg");
 	GLuint textureID = glGetUniformLocation(programID, "myTextureSampler");
+	GLuint textureID2 = glGetUniformLocation(programID, "myTextureSampler2");
 	GLuint dd1 = glGetUniformLocation(programID, "difdelta1");
 	GLuint ddr = glGetUniformLocation(programID, "difdeltar");
 	GLuint ddy = glGetUniformLocation(programID, "difdeltay");
 	GLuint ddg = glGetUniformLocation(programID, "difdeltag");
 	GLuint sd = glGetUniformLocation(programID, "spedelta");
+
+	GLuint normalMapping_flagUniiformLocation = glGetUniformLocation(programID, "normalMapping_flag");
 
 
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
@@ -872,50 +881,80 @@ void paintGL(void)
 	glUniform1f(ddg, gre);
 	glUniform1f(sd, spe);
 
-	//lamp
-	//glBindVertexArray(vaoID0);
+	//earth
+	glBindVertexArray(vaoID0);
 
+	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -5.0f, -20.0f));
+	modelTransformMatrix = glm::mat4();
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -20.0f));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(2.0, 2.0f, 2.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.5f, glm::vec3(0, 0, 1));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, -1.72f, glm::vec3(1, 0, 0));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(0, 0, 1));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -7.0f, -34.0f));
+	normalMapping_flag = true;
+	glUniform1i(normalMapping_flagUniiformLocation, normalMapping_flag);
 
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.0f, glm::vec3(0, 1, 0));
-	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, Texture[1]);
+	glUniform1i(textureID, 1);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Texture[2]);
+	glUniform1i(textureID, 2);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
 
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, Texture[1]);
-	//glUniform1i(textureID, 0);
-	//glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
+	normalMapping_flag = false;
+	glUniform1i(normalMapping_flagUniiformLocation, normalMapping_flag);
+
+	//moon
+	glBindVertexArray(vaoID0);
+	modelTransformMatrix = glm::mat4();
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -30.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, Texture[3]);
+	glUniform1i(textureID, 3);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
+
+	//planet
+	glBindVertexArray(vaoID0);
+	modelTransformMatrix = glm::mat4();
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0, -5.0f, -30.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0 ][0]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, Texture[3]);
+	glUniform1i(textureID, 3);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
 
 	//
 	//car
-	//glBindVertexArray(vaoID1);
-	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(7.0f, -8.0f, -30.0f));
-	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
-	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+	glBindVertexArray(vaoID1);
+	modelTransformMatrix = glm::mat4();
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	//glUniform1i(textureID, 1);
-	//glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, Texture[2]);
+	glUniform1i(textureID, 4);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
 
-	//moon
-	//glBindVertexArray(vaoID2);
-	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(20.0f, 30.0f, -80.0f));
-	//modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.05f, 0.05f, 0.05f));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(0, 0, 1));
-	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_2D, Texture[3]);
-	//glUniform1i(textureID, 2);
-	//glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
 
 
 	//plane
 	//glBindVertexArray(vaoID3);
-	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -10.0f, -27.0f));
+	//modelTransformMatrix = glm::mat4();
+	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, -10.0f, -27.0f));
 	//modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
 	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
@@ -927,16 +966,17 @@ void paintGL(void)
 
 	//slamp
 	glBindVertexArray(vaoID4);
-	modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(10.0f, -8.0f, -40.0f));
+	modelTransformMatrix = glm::mat4();
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(10.0f, -8.0f, -40.0f));
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.8f, 1.2f, 1.0f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, Texture[5]);
-	glUniform1i(textureID, 4);
+	glUniform1i(textureID, 5);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
-*/
+
 /*#######################################################Particle###############################################*/
 /*
 	glUseProgram(programID2);

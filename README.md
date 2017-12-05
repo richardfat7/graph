@@ -1,4 +1,4 @@
-Basic Requirements:
+﻿Basic Requirements:
 You should accomplish the following goals to get the basic points.
 
 - [ ] Create 3 planets (A, B, C), 1 light source box (E) and 1 space vehicle (D), and place them properly. Keep the
@@ -72,3 +72,14 @@ encouraged to explore the amazing instanced rendering. Code of instancing will b
 6. Use more “advanced” texture mappings to make objects more realistic, such as shadow mapping
 environment mapping, displacement mapping etc. (7 points)
 7. Play background music with IrrKlang Library. (2 points)
+
+index	vao	texture
+---------------------------------------
+0	skybox		skybox
+1	earth (planet)	earth
+2			earth_normal
+3	moon (planet)	moon
+4	planet (planet)	planetT1
+5			planetT2
+
+

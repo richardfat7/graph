@@ -14,9 +14,10 @@ void main(){
 
 	TexCoords = position;
 
-	if (fog==true){
+	if (false){
 		float distance = length(view * M * vec4(position, 1.0f));
 		visibility = clamp(exp(-pow((distance * 0.05f), 2.0f)), 0, 0.1f);
 	}
 	else visibility = 1;
+
 }
