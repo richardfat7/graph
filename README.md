@@ -81,9 +81,9 @@ SB	skybox (vaoSB)	skybox  0
 1	moon (vao0)	moon 3
 1	planet (vao0)	planetT1 4
 			planetT2 5 
-2	rock (vao1)	starfy 6
-0	lightbox (vaoSB)	lightbox 7
+2	rock (vao1)	fat 6
+0	lightbox (vao4)	lightbox 7
 3	plane		/
-4	starfy (vao4)	/ 9
+4	starfy (vao3)	starfy 9
 
 

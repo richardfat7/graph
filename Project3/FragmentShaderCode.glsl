@@ -36,14 +36,14 @@ void main()
 
 	vec3 lightVectorWorld1 = normalize(lightPositionWorld1 - vertexPositionWorld);
 	float brightness = dot(lightVectorWorld1, normal);
-	vec4 DifBrightness1 = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-	vec4 DifLightCol1 = vec4(1.0f, 1.0f , 1.0f, 1.0f);
+	vec4 DifBrightness1 = vec4(brightness, brightness, brightness, 1.0f);
+	float Diflightrgb1 = clamp(0.0f + difdelta1, 0 , 1); 
+	vec4 DifLightCol1 = vec4(Diflightrgb1, Diflightrgb1 , Diflightrgb1, 1.0f);
 
 	vec3 lightVectorWorld2 = normalize(lightPositionWorld2 - vertexPositionWorld);
 	brightness = dot(lightVectorWorld2, normal);
 	vec4 DifBrightness2 = vec4(brightness, brightness, brightness, 1.0f);
-	float Diflightrgb2 = clamp(0.0f + difdelta1, 0 , 1); 
-	vec4 DifLightCol2 = vec4(Diflightrgb2, Diflightrgb2 , Diflightrgb2, 1.0f);
+	vec4 DifLightCol2 = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	vec3 lightVectorWorldr = normalize(lightPositionWorldr - vertexPositionWorld);
 	brightness = dot(lightVectorWorldr, normal);
@@ -71,8 +71,8 @@ void main()
 	vec4 MatAmbCol;
 	vec4 MatDifCol;
 	if(multiMapping_flag){
-		MatAmbCol = vec4((0.5 * texture(myTextureSampler,UV) + 0.5 * texture(myTextureSampler2,UV)).rgb, 1.0f);
-		MatDifCol = vec4((0.5 * texture(myTextureSampler,UV) + 0.5 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatAmbCol = vec4((0.1 * texture(myTextureSampler,UV) + 0.9 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatDifCol = vec4((0.1 * texture(myTextureSampler,UV) + 0.9 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 	}
 	else{
 		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);

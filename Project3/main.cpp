@@ -16,6 +16,7 @@ Reference for particle system: http://www.opengl-tutorial.org/intermediate-tutor
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 using namespace std;
 using glm::vec3;
 using glm::mat4;
@@ -29,6 +30,7 @@ GLfloat xangle = 3.14f, yangle = 0.0f;
 int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1;
 int xpos, ypos, xcen, ycen;
 float xx = 1.0, lx = 0.0, ly = 0.0, lz = 0.0, carx = 0.0f, carz = 0.0f, carangle = 0.0f, a=0.0f,b=0.0f,c=0.0f;
+float lightboxx = 0.0, lightboxy = 0.0, lightboxz = 0.0;
 float ddd = 0.0f, red = 0.0f, yel = 0.0f, gre = 0.0f, rc =0.0f, spe = 0.0f;
 int justenter = 0;
 glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
@@ -682,6 +684,35 @@ void sendDataToOpenGL()
 	drawSize[4] = vertices[3].size();
 	//load texture and remember texture ID for paintGL function
 
+	//lightbox
+	res = loadOBJ("obj/lightbox2.obj", vertices[4], uvs[4], normals[4]);
+	//GLuint vaoID1; (throw out!!)
+	glGenVertexArrays(1, &vaoID4);
+	glBindVertexArray(vaoID4);  //first VAO
+
+	glGenBuffers(1, &vboID4);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID4);
+	glBufferData(GL_ARRAY_BUFFER, vertices[4].size() * sizeof(glm::vec3), &vertices[4][0], GL_STATIC_DRAW);
+	//vertex position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//uv
+	//vbo2 uvbuffer
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs[4].size() * sizeof(glm::vec2), &uvs[4][0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	//vbo3 normalcoord
+	glGenBuffers(1, &normalbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glBufferData(GL_ARRAY_BUFFER, normals[4].size() * sizeof(glm::vec3), &normals[4][0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//remember the drawSize for paintGL function
+	drawSize[5] = vertices[4].size();
+	//load texture and remember texture ID for paintGL function
+
 	//drawsize[1] earth
 	Texture[1] = loadBMP_custom("texture/earth.bmp");
 	Texture[2] = loadBMP_custom("normal_map/earth_normal.bmp");
@@ -692,7 +723,7 @@ void sendDataToOpenGL()
 	Texture[5] = loadBMP_custom("texture/apple.bmp");
 	//drawsize[2] rock
 	Texture[6] = loadBMP_custom("texture/helicopter.bmp");
-	//drawsize[0] lightbox
+	//drawsize[5] lightbox
 	Texture[7] = loadBMP_custom("texture/lightbox.bmp");
 	//drawsize[3] plane
 	Texture[8] = loadBMP_custom("texture/helicopter.bmp");
@@ -764,9 +795,13 @@ void paintGL(void)
 		}
 
 	}
+	//planet movement
 	oldtime = newtime;
 	if (rotz == 1)rotz_press_num++;
-
+	//lightbox movement
+	lightboxx = 0.0;
+	lightboxy = sin(oldtime/2000.0)*20.0f;
+	lightboxz = cos(oldtime/2000.0)*20.0f - 20.0f;
 	//TODO:
 	//Set lighting information, such as position and color of lighting source
 	//Set transformation matrix
@@ -776,7 +811,7 @@ void paintGL(void)
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 
-	glm::mat4 projectionMatrix = glm::perspective(2.0f, (float)vp[2] / vp[3], 1.0f, 100.0f);
+	glm::mat4 projectionMatrix = glm::perspective(1.2f, (float)vp[2] / vp[3], 1.0f, 100.0f);
 
 	glUseProgram(SkyboxprogramID);
 
@@ -810,8 +845,8 @@ void paintGL(void)
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	glm::mat4 Matrix = glm::mat4(1.0f);
 	glm::vec4 ambientLight1(0.05f, 0.05f, 0.05f, 1.0f);
-	glm::vec3 lightPosition1(0.0f, 30.0f, -10.0f);
-	glm::vec3 lightPosition2(5.5f, 3.0f, -30.5f);
+	glm::vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
+	glm::vec3 lightPosition2(19.0, -5.0f, -49.0f);
 	glm::vec3 lightPositionr(-4.0, 10.0f, -22.0f);
 	//printf("%.3f %.3f %.3f\n", a,b,c);
 	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
@@ -870,11 +905,11 @@ void paintGL(void)
 
 	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -5.0f, -20.0f));
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -20.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -25.0f));
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.3f, 1.3f, 1.3f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.5f, glm::vec3(0, 0, 1));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, -1.72f, glm::vec3(1, 0, 0));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(0, 0, 1));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.002f, glm::vec3(0, 0, 1));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
@@ -895,7 +930,7 @@ void paintGL(void)
 	//moon
 	glBindVertexArray(vaoID0);
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -30.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -50.0f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
@@ -908,10 +943,10 @@ void paintGL(void)
 	//planet
 	glBindVertexArray(vaoID0);
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(2.5f, 2.5f, 2.5f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0, -5.0f, -30.0f));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(20.0, -5.0f, -50.0f));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.05f, glm::vec3(0.1, 1, 0));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0 ][0]);
 
 	multiMapping_flag = true;
@@ -946,10 +981,10 @@ void paintGL(void)
 
 
 	//lightbox
-	glBindVertexArray(vaoSkybox);
+	glBindVertexArray(vaoID4);
 	modelTransformMatrix = glm::mat4();
-	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(lightboxx, lightboxy, lightboxz));
 	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
 	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
@@ -957,7 +992,7 @@ void paintGL(void)
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, Texture[7]);
 	glUniform1i(textureID, 7);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[0]);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
 	//plane
 	//glBindVertexArray(vaoID3);
 	//modelTransformMatrix = glm::mat4();
