@@ -27,11 +27,12 @@ size_t drawSize[10];
 GLuint vaoID0, vaoID1, vaoID2, vaoID3, vaoID4, vaoID5, vaoID6, vaoID7, vaoSkybox, Texture[10];
 GLuint oldtime = 0;
 GLfloat xangle = 3.14f, yangle = 0.0f;
-int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1;
+int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1, planerot = 1;
 int xpos, ypos, xcen, ycen;
 float xx = 1.0, lx = 0.0, ly = 0.0, lz = 0.0, carx = 0.0f, carz = 0.0f, carangle = 0.0f, a=0.0f,b=0.0f,c=0.0f;
 float lightboxx = 0.0, lightboxy = 0.0, lightboxz = 0.0;
 float ddd = 0.0f, red = 0.0f, yel = 0.0f, gre = 0.0f, rc =0.0f, spe = 0.0f;
+float planeradius=15.0f;
 int justenter = 0;
 glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 
@@ -846,9 +847,9 @@ void paintGL(void)
 	glm::mat4 Matrix = glm::mat4(1.0f);
 	glm::vec4 ambientLight1(0.2f, 0.2f, 0.2f, 1.0f);
 	glm::vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
-	glm::vec3 lightPosition2(carx, -0.0f, carz);
+	glm::vec3 lightPosition2(3.0f, -0.0f, -11.0f);
 	glm::vec3 lightPositionr(-4.0, 10.0f, -22.0f);
-	printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
+	//printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
 	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
 	glm::vec3 lightPositiong(-4.0, 9.4f, -22.0f);
 	glm::vec3 eyePosition(0.0f, 0.0f, 0.0f);
@@ -909,7 +910,7 @@ void paintGL(void)
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.3f, 1.3f, 1.3f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.5f, glm::vec3(0, 0, 1));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, -1.72f, glm::vec3(1, 0, 0));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.002f, glm::vec3(0, 0, 1));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.001f, glm::vec3(0, 0, 1));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
@@ -945,8 +946,8 @@ void paintGL(void)
 	modelTransformMatrix = glm::mat4();
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(20.0, 0.0f, -35.0f));
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.05f, glm::vec3(0.1, 1, 0));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.0005f, glm::vec3(0.1, 1, 0));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-1.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
 	multiMapping_flag = true;
@@ -966,6 +967,7 @@ void paintGL(void)
 
 	//
 	//rock
+
 	glBindVertexArray(vaoID1);
 	modelTransformMatrix = glm::mat4();
 	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
@@ -998,8 +1000,10 @@ void paintGL(void)
 	//plane
 	glBindVertexArray(vaoID2);
 	modelTransformMatrix = glm::mat4();
-	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, -10.0f, -27.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-30.0f, -10.0f, -50.0f));
+	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num * 0.01f, glm::vec3(1, 0, 0));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, planeradius, 0.0f));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.002f, 0.002f, 0.002f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
 	glActiveTexture(GL_TEXTURE8);
@@ -1016,7 +1020,7 @@ void paintGL(void)
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	glActiveTexture(GL_TEXTURE5);
+	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, Texture[9]);
 	glUniform1i(textureID, 9);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);

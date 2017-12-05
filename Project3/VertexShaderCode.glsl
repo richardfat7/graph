@@ -16,11 +16,11 @@ out vec3 vertexPositionWorld;
 void main()
 {
 	vec4 v = vec4(position, 1.0);
-	vec4 new_position = viewMatrix * modelTransformMatrix * v;
-	vec4 projected_position = projectionMatrix * new_position;
+	vec4 new_position =  modelTransformMatrix * v;
+	vec4 projected_position = projectionMatrix * viewMatrix * new_position;
 	gl_Position = projected_position;
 
-	vec4 normal_temp = viewMatrix * modelTransformMatrix * vec4(normal,0);
+	vec4 normal_temp = modelTransformMatrix * vec4(normal,0);
 	normalWorld = normal_temp.xyz;
 	vertexPositionWorld = new_position.xyz;
 	UV = vertexUV;
