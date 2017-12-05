@@ -9,6 +9,4 @@ uniform samplerCube skybox;
 
 void main(){
 	dacolor = texture(skybox, TexCoords);
-	
-
 }

@@ -20,6 +20,7 @@ uniform float difdeltag;
 uniform float spedelta;
 
 uniform bool normalMapping_flag;
+uniform bool multiMapping_flag;
 
 out vec4 finalColor;
 
@@ -30,7 +31,6 @@ void main()
 		normal = texture(myTextureSampler2, UV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);
 	}
-
 	
 	vec4 AmbLightCol1 = ambientLight1;
 
@@ -68,8 +68,17 @@ void main()
 	float SpeBrightness = clamp(dot(reflectedLightVectorWorld, eyeVectorWorld), 0 ,1);
 	vec4 SpeLightCol = vec4(0.1f + spedelta ,0.1f + spedelta , 0.1f + spedelta , 1.0f);
 
-	vec4 MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
-	vec4 MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
+	vec4 MatAmbCol;
+	vec4 MatDifCol;
+	if(multiMapping_flag){
+		MatAmbCol = vec4((0.5 * texture(myTextureSampler,UV) + 0.5 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatDifCol = vec4((0.5 * texture(myTextureSampler,UV) + 0.5 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+	}
+	else{
+		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
+		MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
+		}
+
 	vec4 MatSpeCol = vec4(0.3f, 0.3f, 0.3f, 1.0f);
 
 	finalColor = MatAmbCol * AmbLightCol1+
