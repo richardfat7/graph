@@ -6,7 +6,8 @@ c:\users\hei\documents\graph\project3\main.cpp(925): warning C4267: 'argument': 
 c:\users\hei\documents\graph\project3\main.cpp(941): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(965): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(980): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(995): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1020): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(996): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1008): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1022): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.exe
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.pdb (Partial PDB)

@@ -43,7 +43,7 @@ void main()
 	vec3 lightVectorWorld2 = normalize(lightPositionWorld2 - vertexPositionWorld);
 	brightness = dot(lightVectorWorld2, normal);
 	vec4 DifBrightness2 = vec4(brightness, brightness, brightness, 1.0f);
-	vec4 DifLightCol2 = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	vec4 DifLightCol2 = vec4(3.0f, 3.0f, 3.0f, 1.0f);
 
 	vec3 lightVectorWorldr = normalize(lightPositionWorldr - vertexPositionWorld);
 	brightness = dot(lightVectorWorldr, normal);
@@ -63,7 +63,7 @@ void main()
 	float Diflightrgbg = clamp(0.0f + difdeltag, 0 , 0.5); 
 	vec4 DifLightColg = vec4(0.0f, Diflightrgbg ,0.0f, 1.0f);
 
-	vec3 reflectedLightVectorWorld = normalize (reflect (-lightVectorWorld2, normal));
+	vec3 reflectedLightVectorWorld = reflect (-lightVectorWorld2, normal);
 	vec3 eyeVectorWorld = normalize (eyePositionWorld - vertexPositionWorld);
 	float SpeBrightness = clamp(dot(reflectedLightVectorWorld, eyeVectorWorld), 0 ,1);
 	vec4 SpeLightCol = vec4(0.1f + spedelta ,0.1f + spedelta , 0.1f + spedelta , 1.0f);

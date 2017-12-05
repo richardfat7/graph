@@ -800,8 +800,8 @@ void paintGL(void)
 	if (rotz == 1)rotz_press_num++;
 	//lightbox movement
 	lightboxx = 0.0;
-	lightboxy = sin(oldtime/2000.0)*20.0f;
-	lightboxz = cos(oldtime/2000.0)*20.0f - 20.0f;
+	lightboxy = sin(oldtime/1000.0)*40.0f + 10.0f;
+	lightboxz = cos(oldtime/1000.0)*20.0f - 30.f;
 	//TODO:
 	//Set lighting information, such as position and color of lighting source
 	//Set transformation matrix
@@ -844,11 +844,11 @@ void paintGL(void)
 	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	glm::mat4 Matrix = glm::mat4(1.0f);
-	glm::vec4 ambientLight1(0.05f, 0.05f, 0.05f, 1.0f);
+	glm::vec4 ambientLight1(0.2f, 0.2f, 0.2f, 1.0f);
 	glm::vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
-	glm::vec3 lightPosition2(19.0, -5.0f, -49.0f);
+	glm::vec3 lightPosition2(carx, -0.0f, carz);
 	glm::vec3 lightPositionr(-4.0, 10.0f, -22.0f);
-	//printf("%.3f %.3f %.3f\n", a,b,c);
+	printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
 	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
 	glm::vec3 lightPositiong(-4.0, 9.4f, -22.0f);
 	glm::vec3 eyePosition(0.0f, 0.0f, 0.0f);
@@ -943,11 +943,11 @@ void paintGL(void)
 	//planet
 	glBindVertexArray(vaoID0);
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(20.0, -5.0f, -50.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(20.0, 0.0f, -35.0f));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.05f, glm::vec3(0.1, 1, 0));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0 ][0]);
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
 	multiMapping_flag = true;
 	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
@@ -968,8 +968,8 @@ void paintGL(void)
 	//rock
 	glBindVertexArray(vaoID1);
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, 0.0f, carz));
+	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, -2.0f, carz));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
@@ -985,6 +985,7 @@ void paintGL(void)
 	modelTransformMatrix = glm::mat4();
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(lightboxx, lightboxy, lightboxz));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
 	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
 	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
@@ -993,17 +994,18 @@ void paintGL(void)
 	glBindTexture(GL_TEXTURE_2D, Texture[7]);
 	glUniform1i(textureID, 7);
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
-	//plane
-	//glBindVertexArray(vaoID3);
-	//modelTransformMatrix = glm::mat4();
-	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, -10.0f, -27.0f));
-	//modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(4.0f, 4.0f, 4.0f));
-	//glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
-	//glActiveTexture(GL_TEXTURE3);
-	//glBindTexture(GL_TEXTURE_2D, Texture[4]);
-	//glUniform1i(textureID, 3);
-	//glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
+	//plane
+	glBindVertexArray(vaoID2);
+	modelTransformMatrix = glm::mat4();
+	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, -10.0f, -27.0f));
+	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, Texture[8]);
+	glUniform1i(textureID, 8);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
 
 	
 	//starvy
