@@ -1,12 +1,14 @@
 #version 440
 
 in layout(location=0) vec3 position;
-out vec3 TexCoords;
-out float visibility;
+
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 M;
-uniform bool fog;
+uniform bool fog_flag;
+
+out vec3 TexCoords;
+out float visibility;
 
 void main(){
 	vec4 pos = projection * view * M * vec4(position, 1.0f);
@@ -14,10 +16,13 @@ void main(){
 
 	TexCoords = position;
 
-	if (false){
-		float distance = length(view * M * vec4(position, 1.0f));
-		visibility = clamp(exp(-pow((distance * 0.05f), 2.0f)), 0, 0.1f);
+	visibility = 1;
+	if(fog_flag == true){
+		float fogDen = 0.05f;
+		float fogGrad = 2.0f;
+		float distance = length(view * M * vec4(TexCoords, 1.0f));
+		visibility = exp ( -pow ((distance * fogDen), fogGrad ));
+		visibility = clamp (visibility , 0 ,1);
 	}
-	else visibility = 1;
 
 }

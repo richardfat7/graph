@@ -34,7 +34,10 @@ float lightboxx = 0.0, lightboxy = 0.0, lightboxz = 0.0;
 float ddd = 0.0f, red = 0.0f, yel = 0.0f, gre = 0.0f, rc =0.0f, spe = 0.0f;
 float planeradius=15.0f;
 int justenter = 0;
+bool fog_flag = false;
 glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+
+glm::vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
 
 /*#####################################Particle#########################################*/
 GLuint billbdvbo, ppVao;
@@ -721,7 +724,7 @@ void sendDataToOpenGL()
 	Texture[3] = loadBMP_custom("oldtexture/moon.bmp");
 	//drawsize[1] sun
 	Texture[4] = loadBMP_custom("texture/sun.bmp");
-	Texture[5] = loadBMP_custom("texture/apple.bmp");
+	Texture[5] = loadBMP_custom("texture/jupiter.bmp");
 	//drawsize[2] rock
 	Texture[6] = loadBMP_custom("texture/helicopter.bmp");
 	//drawsize[5] lightbox
@@ -814,6 +817,8 @@ void paintGL(void)
 
 	glm::mat4 projectionMatrix = glm::perspective(1.2f, (float)vp[2] / vp[3], 1.0f, 100.0f);
 
+
+
 	glUseProgram(SkyboxprogramID);
 
 	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f));
@@ -827,7 +832,11 @@ void paintGL(void)
 	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "M"), 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "projection"), 1, GL_FALSE, &projectionMatrix[0][0]);
-	
+	GLuint fog_flagUniiformLocation = glGetUniformLocation(SkyboxprogramID, "fog_flag");
+	GLuint fog_ColorUniiformLocation = glGetUniformLocation(SkyboxprogramID, "fog_Color");
+	//fog_flag = true;
+	glUniform1i(fog_flagUniiformLocation, fog_flag);
+	glUniform3fv(fog_ColorUniiformLocation, 1, &fog_Color[0]);
 	//skybox cube
 	glBindVertexArray(vaoSkybox);
 	glUniform1i(glGetUniformLocation(SkyboxprogramID, "skybox"), 0);
@@ -847,7 +856,7 @@ void paintGL(void)
 	glm::mat4 Matrix = glm::mat4(1.0f);
 	glm::vec4 ambientLight1(0.2f, 0.2f, 0.2f, 1.0f);
 	glm::vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
-	glm::vec3 lightPosition2(3.0f, -0.0f, -11.0f);
+	glm::vec3 lightPosition2(20.0, 0.0f, -35.0f);
 	glm::vec3 lightPositionr(-4.0, 10.0f, -22.0f);
 	//printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
 	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
@@ -877,6 +886,12 @@ void paintGL(void)
 
 	GLuint normalMapping_flagUniiformLocation = glGetUniformLocation(programID, "normalMapping_flag");
 	GLuint multiMapping_flagUniiformLocation = glGetUniformLocation(programID, "multiMapping_flag");
+	fog_flagUniiformLocation = glGetUniformLocation(programID, "fog_flag");
+	fog_ColorUniiformLocation = glGetUniformLocation(programID, "fog_Color");
+	GLuint sunUniiformLocation = glGetUniformLocation(programID, "sun");
+	//fog_flag = true;
+	glUniform1i(fog_flagUniiformLocation, fog_flag);
+	glUniform3fv(fog_ColorUniiformLocation, 1, &fog_Color[0]);
 
 
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
@@ -906,12 +921,12 @@ void paintGL(void)
 
 	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -5.0f, -20.0f));
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -25.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -30.0f));
 	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.3f, 1.3f, 1.3f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.5f, glm::vec3(0, 0, 1));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, -1.72f, glm::vec3(1, 0, 0));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.001f, glm::vec3(0, 0, 1));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-1.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
 
 	normalMapping_flag = true;
@@ -931,7 +946,7 @@ void paintGL(void)
 	//moon
 	glBindVertexArray(vaoID0);
 	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -50.0f));
+	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -40.0f));
 	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
 	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
 	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
@@ -960,10 +975,16 @@ void paintGL(void)
 	glBindTexture(GL_TEXTURE_2D, Texture[5]);
 	glUniform1i(textureID2, 5);
 
-	multiMapping_flag = false;
-	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
+	bool sun = true;
+	glUniform1i(sunUniiformLocation, sun);
 
 	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
+
+	multiMapping_flag = false;
+	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
+	sun = false;
+	glUniform1i(sunUniiformLocation, sun);
+
 
 	//
 	//rock

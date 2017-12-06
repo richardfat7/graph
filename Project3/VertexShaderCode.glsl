@@ -9,9 +9,12 @@ uniform mat4 modelTransformMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
+uniform bool fog_flag;
+
 out vec2 UV;
 out vec3 normalWorld;
 out vec3 vertexPositionWorld;
+out float visibility;
 
 void main()
 {
@@ -24,4 +27,14 @@ void main()
 	normalWorld = normal_temp.xyz;
 	vertexPositionWorld = new_position.xyz;
 	UV = vertexUV;
+
+	visibility = 1;
+	if(fog_flag == true){
+		float fogDen = 0.02f;
+		float fogGrad = 2.0f;
+		float distance = length(viewMatrix * new_position);
+		visibility = exp ( -pow ((distance * fogDen), fogGrad ));
+		visibility = clamp (visibility , 0 ,1);
+	}
+
 }

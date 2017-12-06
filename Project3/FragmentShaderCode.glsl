@@ -3,6 +3,7 @@
 in vec2 UV;
 in vec3 normalWorld;
 in vec3 vertexPositionWorld;
+in float visibility;
 
 uniform vec4 ambientLight1;
 uniform vec3 lightPositionWorld1;
@@ -21,13 +22,16 @@ uniform float spedelta;
 
 uniform bool normalMapping_flag;
 uniform bool multiMapping_flag;
+uniform bool sun;
 
-out vec4 finalColor;
+uniform vec3 fog_Color;
+
+out vec4 fogfinalColor;
 
 void main()
 {
 	vec3 normal = normalize(normalWorld);
-	if (normalMapping_flag){
+	if (!normalMapping_flag){
 		normal = texture(myTextureSampler2, UV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);
 	}
@@ -42,6 +46,7 @@ void main()
 
 	vec3 lightVectorWorld2 = normalize(lightPositionWorld2 - vertexPositionWorld);
 	brightness = dot(lightVectorWorld2, normal);
+	if(sun == true)brightness = brightness * -0.7;
 	vec4 DifBrightness2 = vec4(brightness, brightness, brightness, 1.0f);
 	vec4 DifLightCol2 = vec4(3.0f, 3.0f, 3.0f, 1.0f);
 
@@ -71,8 +76,8 @@ void main()
 	vec4 MatAmbCol;
 	vec4 MatDifCol;
 	if(multiMapping_flag){
-		MatAmbCol = vec4((0.1 * texture(myTextureSampler,UV) + 0.9 * texture(myTextureSampler2,UV)).rgb, 1.0f);
-		MatDifCol = vec4((0.1 * texture(myTextureSampler,UV) + 0.9 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatAmbCol = vec4((0.4 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatDifCol = vec4((0.4 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 	}
 	else{
 		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
@@ -81,11 +86,14 @@ void main()
 
 	vec4 MatSpeCol = vec4(0.3f, 0.3f, 0.3f, 1.0f);
 
-	finalColor = MatAmbCol * AmbLightCol1+
+	if(sun==true)AmbLightCol1;
+	vec4 finalColor = MatAmbCol * AmbLightCol1+
 				 MatDifCol * DifLightCol1 * DifBrightness1 +
 				 MatDifCol * DifLightCol2 * DifBrightness2 +
 				 MatDifCol * DifLightColr * DifBrightnessr +
 				 MatDifCol * DifLightColy * DifBrightnessy +
 				 MatDifCol * DifLightColg * DifBrightnessg +
 				 MatSpeCol * SpeLightCol * pow(SpeBrightness,50);
+
+	fogfinalColor = mix (vec4(fog_Color, 1.0f), finalColor, visibility);
 }

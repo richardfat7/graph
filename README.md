@@ -34,7 +34,7 @@ box at the light position. Basically, only pure color is required for the light 
 - [ ] For viewpoint switch, at least 3 distinctive viewpoints (such as –X, +X, +Y axis) should be provided as
 choices so that we can explore your Universe from different aspects.
 
-- [ ] Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
+- [X] Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
 
 - [ ] Graphical User Interface. A GUI should be created with the GLUI Library (similar as the figure shows)
 which includes the module:

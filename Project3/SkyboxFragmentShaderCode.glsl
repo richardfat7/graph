@@ -3,10 +3,15 @@
 in vec3 TexCoords;
 in float visibility;
 
-out vec4 dacolor;
 
 uniform samplerCube skybox;
 
+uniform vec3 fog_Color;
+
+out vec4 fogfinalColor;
+
+
 void main(){
-	dacolor = texture(skybox, TexCoords);
+	vec4 finalColor = texture(skybox, TexCoords);
+	fogfinalColor = mix (vec4(fog_Color, 1.0f), finalColor, visibility);
 }
