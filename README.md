@@ -11,7 +11,7 @@ around the Universe. No translation and zoom should happen for Skybox.
 - [ ] Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
 floating rocks should have random sizes and locations in a limited range.
 
-- [] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
+- [ ] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
 vehicle D and every rock in G; Conduct multiple texture mapping for planet C. Textures used for A, B, C, D
 and G should be different from each other. You can use any texture you like, even a chocolate or strawberry.
 
