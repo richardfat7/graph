@@ -1,4 +1,5 @@
 ﻿  main.cpp
+<<<<<<< ec329e12c743ac7ee3b6c9c18511c3eeb7d7a26c
 c:\users\hei\documents\graph\project3\main.cpp(41): error C2872: 'right': ambiguous symbol
   c:\users\hei\documents\graph\project3\main.cpp(40): note: could be 'glm::vec3 right'
   c:\program files (x86)\vc\include\ios(315): note: or       'std::ios_base &std::right(std::ios_base &)'
@@ -12,3 +13,16 @@ c:\users\hei\documents\graph\project3\main.cpp(1007): warning C4267: 'argument':
 c:\users\hei\documents\graph\project3\main.cpp(1023): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(1037): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(1051): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+=======
+c:\github\graph\project3\main.cpp(600): warning C4101: 'vboID4': unreferenced local variable
+c:\github\graph\project3\main.cpp(600): warning C4101: 'vboID0': unreferenced local variable
+c:\github\graph\project3\main.cpp(600): warning C4101: 'vboID3': unreferenced local variable
+c:\github\graph\project3\main.cpp(600): warning C4101: 'vboID2': unreferenced local variable
+c:\github\graph\project3\main.cpp(600): warning C4101: 'vboID1': unreferenced local variable
+c:\github\graph\project3\main.cpp(820): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(898): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(941): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+c:\github\graph\project3\main.cpp(993): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.exe
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.pdb (Partial PDB)
+>>>>>>> add instancing

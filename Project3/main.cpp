@@ -7,6 +7,7 @@ Student ID: 1155077843
 Student Name: Lo Chun Hei
 Reference for particle system: http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/particles-instancing/
 *********************************************************/
+
 #define _CRT_SECURE_NO_WARNINGS
 #include "Dependencies\glew\glew.h"
 #include "Dependencies\freeglut\freeglut.h"
@@ -18,13 +19,121 @@ Reference for particle system: http://www.opengl-tutorial.org/intermediate-tutor
 #include <algorithm>
 #include <cmath>
 using namespace std;
+using glm::vec2;
 using glm::vec3;
+using glm::vec4;
 using glm::mat4;
 
-GLuint programID, programID2, SkyboxprogramID;
-size_t drawSize[10];
+#define MAXOBJ				6
+#define MAXTEXTURE			10
+#define MAXDRAWNOBJ			6
+
+#define VAO_PLANET			0
+#define VAO_ROCK			1
+#define VAO_PLANE			2
+#define VAO_STAR			3
+#define VAO_LIGHTBOX		4
+#define VAO_PARTICAL		5
+
+#define TXT_NULL			999
+#define TXT_EARTH			0
+#define TXT_NORM_EARTH		1
+#define TXT_MOON			2
+#define TXT_SUN_SUN			3
+#define TXT_SUN_JUPITER		4
+#define TXT_ROCK			5
+#define TXT_LIGHTBOX		6
+#define TXT_HELICOPTER		7
+#define TXT_STARFY			8
+#define TXT_PARTICAL		9
+
+#define DRAWN_SUN			0
+#define DRAWN_MOON			1
+#define DRAWN_EARTH			2
+#define DRAWN_PLANE			3
+#define DRAWN_LIGHTBOX		4
+#define DRAWN_STAR			5
+
+typedef enum txtMode { NOTXT, SIGTXT, MULTXT, NORMTXT } TXTMode;
+
+class DrawnObj {
+	public:
+		GLuint vao;
+		GLuint texture;
+		GLuint texture2;
+		GLuint norm_texture;
+		TXTMode mode;
+		bool isLightSource;
+		mat4 modelTransformMatrix;
+		void setContent(GLuint aVao, GLuint aTexture, GLuint aTexture2, GLuint aNorm_texture, TXTMode aMode, bool isLightSource);
+};
+
+int objList[MAXOBJ] = {
+	VAO_PLANET,
+	VAO_ROCK,
+	VAO_PLANE,
+	VAO_STAR,
+	VAO_LIGHTBOX,
+	VAO_PARTICAL
+};
+char* objResList[MAXOBJ] = { 
+	"obj/planet.obj", 
+	"obj/rock.obj",
+	"obj/Arc170.obj", 
+	"obj/starfy.obj", 
+	"obj/lightbox2.obj" ,
+	"obj/rock.obj"
+};
+int txtList[MAXTEXTURE] = {
+	TXT_EARTH,
+	TXT_NORM_EARTH,
+	TXT_MOON, 
+	TXT_SUN_SUN, 
+	TXT_SUN_JUPITER,
+	TXT_ROCK,
+	TXT_LIGHTBOX,
+	TXT_HELICOPTER,
+	TXT_STARFY,
+	TXT_PARTICAL
+};
+char* txtResList[MAXTEXTURE] = {
+	"texture/earth.bmp", 
+	"normal_map/earth_normal.bmp", 
+	"oldtexture/moon.bmp", 
+	"texture/sun.bmp", 
+	"texture/jupiter.bmp", 
+	"texture/helicopter.bmp",
+	"texture/lightbox.bmp",
+	"texture/helicopter.bmp", 
+	"texture/starfy.bmp",
+	"texture/rock.bmp"
+};
+int drawnListIndex[MAXDRAWNOBJ] = {
+	DRAWN_SUN,
+	DRAWN_MOON,
+	DRAWN_EARTH, 
+	DRAWN_PLANE, 
+	DRAWN_LIGHTBOX,
+	DRAWN_STAR
+};
+DrawnObj drawnList[MAXDRAWNOBJ];
+
+GLuint commonProgram, instanceProgram, skyboxProgram;
+GLint modelTransformMatrixUniformLocation, projectionMatrixUniformLocation, rotationMatrixUniformLocation, viewMatrixUniformLocation,
+	ambientLightUniformLocation, eyePositionUniformLocation, lightPosition1UniformLocation, lightPosition2UniformLocation,
+	lightPositionrUniformLocation, lightPositionyUniformLocation, lightPositiongUniformLocation,
+	textureID, textureID2,
+	dd1, ddr, ddy, ddg, sd,
+	normalMapping_flagUniiformLocation, multiMapping_flagUniiformLocation,
+	fog_flagUniiformLocation, fog_ColorUniiformLocation, sunUniformLocation,
+	i_textureID,
+	i_ambientLightUniformLocation, i_eyePositionUniformLocation, i_lightPosition1UniformLocation, i_lightPosition2UniformLocation,
+	i_dd1, i_sd;
+
+size_t drawSize[MAXOBJ + 1];
 // Could define the Vao&Vbo and interaction parameter here
-GLuint vaoID0, vaoID1, vaoID2, vaoID3, vaoID4, vaoID5, vaoID6, vaoID7, vaoSkybox, Texture[10];
+GLuint vao[MAXOBJ], vaoSkybox, texture[MAXTEXTURE + 1];
+GLuint ppvbo;
 GLuint oldtime = 0;
 GLfloat xangle = 3.14f, yangle = 0.0f;
 int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1, planerot = 1;
@@ -35,22 +144,18 @@ float ddd = 0.0f, red = 0.0f, yel = 0.0f, gre = 0.0f, rc =0.0f, spe = 0.0f;
 float planeradius=15.0f;
 int justenter = 0;
 bool fog_flag = false;
-glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
-glm::vec3 direction = glm::vec3(cos(yangle) * sin(xangle), sin(yangle), cos(yangle) * cos(xangle));
-glm::vec3 right1 = glm::vec3(sin(xangle - 3.14f / 2.0f), 0.0f, cos(xangle - 3.14f / 2.0f));
-glm::vec3 up = glm::cross(right1, direction);
 
-glm::vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
+mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+vec3 direction = vec3(cos(yangle) * sin(xangle), sin(yangle), cos(yangle) * cos(xangle));
+vec3 right1 = vec3(sin(xangle - 3.14f / 2.0f), 0.0f, cos(xangle - 3.14f / 2.0f));
+vec3 up = glm::cross(right1, direction);
 
-/*#####################################Particle#########################################*/
-GLuint billbdvbo, ppVao;
-GLuint partposvbo;
-GLuint partcolvbo;
+vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
+
 
 struct Particle {
-	glm::vec3 pos, speed;
-	unsigned char r, g, b, a; // Color
-	float size, angle, weight;
+	vec3 pos;
+	float size, angle, w, selfRotAngle, selfRotW, radius;
 	float life;
 	float cameradistance; // *Squared* distance to the camera. if dead : -1.0f
 
@@ -62,8 +167,7 @@ struct Particle {
 
 const int maxnopar = 3000;
 Particle ParticlesContainer[maxnopar];
-static GLfloat* g_par_position_size_data = new GLfloat[maxnopar * 4];
-static GLubyte* g_par_color_data = new GLubyte[maxnopar * 4];
+static mat4* g_par_position_size_data = new mat4[maxnopar];
 
 int LastUsedParticle = 0;
 
@@ -137,112 +241,42 @@ string readShaderCode(const char* fileName)
 	);
 }
 
-void installShaders()
+int installShaders(char* vertexShader, char* fragmentShader)
 {
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
 	const GLchar* adapter[1];
-	string temp = readShaderCode("VertexShaderCode.glsl");
+	string temp = readShaderCode(vertexShader);
 	adapter[0] = temp.c_str();
 	glShaderSource(vertexShaderID, 1, adapter, 0);
-	temp = readShaderCode("FragmentShaderCode.glsl");
+	temp = readShaderCode(fragmentShader);
 	adapter[0] = temp.c_str();
 	glShaderSource(fragmentShaderID, 1, adapter, 0);
 
 	glCompileShader(vertexShaderID);
 	glCompileShader(fragmentShaderID);
-	
 
-	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID))
-		return;
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID)) {
+		printf("Cannot create program with %s, %s\n", vertexShader, fragmentShader);
+		return -1;
+	}
 
-	programID = glCreateProgram();
-	glAttachShader(programID, vertexShaderID);
-	glAttachShader(programID, fragmentShaderID);
-	glLinkProgram(programID);
+	int program = glCreateProgram();
+	glAttachShader(program, vertexShaderID);
+	glAttachShader(program, fragmentShaderID);
+	glLinkProgram(program);
 
-	if (!checkProgramStatus(programID))
-		return;
+	if (!checkProgramStatus(program)) {
+		printf("Cannot create program with %s, %s\n", vertexShader, fragmentShader);
+		return -1;
+	}
 
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
 
-	glUseProgram(programID);
+	return program;
 }
-
-void installParticleShaders()
-{
-
-	GLuint vertexShaderID2 = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragmentShaderID2 = glCreateShader(GL_FRAGMENT_SHADER);
-
-
-	const GLchar* adapter[1];
-	string temp = readShaderCode("VertexShaderCode2.glsl");
-	adapter[0] = temp.c_str();
-	glShaderSource(vertexShaderID2, 1, adapter, 0);
-	temp = readShaderCode("FragmentShaderCode2.glsl");
-	adapter[0] = temp.c_str();
-	glShaderSource(fragmentShaderID2, 1, adapter, 0);
-
-	glCompileShader(vertexShaderID2);
-	glCompileShader(fragmentShaderID2);
-
-	if (!checkShaderStatus(vertexShaderID2) || !checkShaderStatus(fragmentShaderID2))
-		return;
-
-	programID2 = glCreateProgram();
-	glAttachShader(programID2, vertexShaderID2);
-	glAttachShader(programID2, fragmentShaderID2);
-	glLinkProgram(programID2);
-
-
-	if (!checkProgramStatus(programID2))
-		return;
-
-	glDeleteShader(vertexShaderID2);
-	glDeleteShader(fragmentShaderID2);
-
-	glUseProgram(programID2);
-}
-
-void installSkyboxShaders()
-{
-	GLuint SkyboxvertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	GLuint SkyboxfragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	const GLchar* adapter[1];
-	string temp = readShaderCode("SkyboxVertexShaderCode.glsl");
-	adapter[0] = temp.c_str();
-	glShaderSource(SkyboxvertexShaderID, 1, adapter, 0);
-	temp = readShaderCode("SkyboxFragmentShaderCode.glsl");
-	adapter[0] = temp.c_str();
-	glShaderSource(SkyboxfragmentShaderID, 1, adapter, 0);
-
-
-	glCompileShader(SkyboxvertexShaderID);
-	glCompileShader(SkyboxfragmentShaderID);
-
-
-	if (!checkShaderStatus(SkyboxvertexShaderID) || !checkShaderStatus(SkyboxfragmentShaderID))
-		return;
-
-	SkyboxprogramID = glCreateProgram();
-	glAttachShader(SkyboxprogramID, SkyboxvertexShaderID);
-	glAttachShader(SkyboxprogramID, SkyboxfragmentShaderID);
-	glLinkProgram(SkyboxprogramID);
-
-	if (!checkProgramStatus(SkyboxprogramID))
-		return;
-
-	glDeleteShader(SkyboxvertexShaderID);
-	glDeleteShader(SkyboxfragmentShaderID);
-
-	glUseProgram(SkyboxprogramID);
-}
-
-
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -298,16 +332,16 @@ void MouseWheel(int button, int state, int x, int y) {
 
 bool loadOBJ(
 	const char * path,
-	std::vector<glm::vec3> & out_vertices,
-	std::vector<glm::vec2> & out_uvs,
-	std::vector<glm::vec3> & out_normals
+	std::vector<vec3> & out_vertices,
+	std::vector<vec2> & out_uvs,
+	std::vector<vec3> & out_normals
 ) {
 	printf("Loading OBJ file %s...\n", path);
 
 	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-	std::vector<glm::vec3> temp_vertices;
-	std::vector<glm::vec2> temp_uvs;
-	std::vector<glm::vec3> temp_normals;
+	std::vector<vec3> temp_vertices;
+	std::vector<vec2> temp_uvs;
+	std::vector<vec3> temp_normals;
 
 
 	FILE * file = fopen(path, "r");
@@ -327,18 +361,18 @@ bool loadOBJ(
 				   // else : parse lineHeader
 
 		if (strcmp(lineHeader, "v") == 0) {
-			glm::vec3 vertex;
+			vec3 vertex;
 			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			temp_vertices.push_back(vertex);
 		}
 		else if (strcmp(lineHeader, "vt") == 0) {
-			glm::vec2 uv;
+			vec2 uv;
 			fscanf(file, "%f %f\n", &uv.x, &uv.y);
 			uv.y = -uv.y;
 			temp_uvs.push_back(uv);
 		}
 		else if (strcmp(lineHeader, "vn") == 0) {
-			glm::vec3 normal;
+			vec3 normal;
 			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
 			temp_normals.push_back(normal);
 		}
@@ -376,9 +410,9 @@ bool loadOBJ(
 		unsigned int normalIndex = normalIndices[i];
 
 		// Get the attributes thanks to the index
-		glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-		glm::vec2 uv = temp_uvs[uvIndex - 1];
-		glm::vec3 normal = temp_normals[normalIndex - 1];
+		vec3 vertex = temp_vertices[vertexIndex - 1];
+		vec2 uv = temp_uvs[uvIndex - 1];
+		vec3 normal = temp_normals[normalIndex - 1];
 
 		// Put the attributes in buffers
 		out_vertices.push_back(vertex);
@@ -450,7 +484,7 @@ GLuint loadCubemap(vector<const GLchar*> faces) {
 	const GLchar* imagepath;
 	GLuint textureID;
 	glGenTextures(1, &textureID);
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
 	for (GLuint i = 0; i < faces.size(); i++) {
@@ -503,10 +537,6 @@ GLuint loadCubemap(vector<const GLchar*> faces) {
 
 void sendDataToOpenGL()
 {
-	//TODO:
-	//Load objects and bind to VAO & VBO
-	//Load texture
-
 	/*skybox*/
 	GLfloat skyboxVertices[] = {
 		-1.0f, +1.0f, -1.0f,
@@ -560,7 +590,7 @@ void sendDataToOpenGL()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	drawSize[0] = GLint(sizeof(skyboxVertices));
+	drawSize[MAXOBJ] = GLint(sizeof(skyboxVertices));
 	vector<const GLchar*> Skybox_faces;
 	Skybox_faces.push_back("texture/universe_skybox/right.bmp");
 	Skybox_faces.push_back("texture/universe_skybox/left.bmp");
@@ -568,204 +598,155 @@ void sendDataToOpenGL()
 	Skybox_faces.push_back("texture/universe_skybox/bottom.bmp");
 	Skybox_faces.push_back("texture/universe_skybox/back.bmp");
 	Skybox_faces.push_back("texture/universe_skybox/front.bmp");
-	Texture[0] = loadCubemap(Skybox_faces);
+	texture[10] = loadCubemap(Skybox_faces);
 
-	std::vector<glm::vec3> vertices[5];
-	std::vector<glm::vec2> uvs[5];
-	std::vector<glm::vec3> normals[5];
-	GLuint vboID0, vboID1, vboID2, vboID3, vboID4;
+	std::vector<vec3> vertices[5];
+	std::vector<vec2> uvs[5];
+	std::vector<vec3> normals[5];
+	GLuint vboID0, vboID1, vboID2, vboID3, vboID4;	
 
-	bool res = loadOBJ("obj/planet.obj", vertices[0], uvs[0], normals[0]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID0);
-	glBindVertexArray(vaoID0);  //first VAO
-								
-	glGenBuffers(1, &vboID0);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID0);
-	glBufferData(GL_ARRAY_BUFFER, vertices[0].size() * sizeof(glm::vec3), &vertices[0][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[0].size() * sizeof(glm::vec2), &uvs[0][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	GLuint normalbuffer;
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[0].size() * sizeof(glm::vec3), &normals[0][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	drawSize[1] = vertices[0].size();
+	int i;
 
+	glGenVertexArrays(MAXOBJ, vao);
+	for (i = 0; i < sizeof(objList) / sizeof(objList[0]); i++) {
+		std::vector<vec3> vertices;
+		std::vector<vec2> uvs;
+		std::vector<vec3> normals;
+		GLuint vertexbuffer, uvbuffer, normalbuffer;
+		int index = objList[i];
 
-	res = loadOBJ("obj/rock.obj", vertices[1], uvs[1], normals[1]);
-	//res = loadOBJ("plane.obj", vertices[1], uvs[1], normals[1]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID1);
-	glBindVertexArray(vaoID1);  //first VAO
-								//vbo1
-	glGenBuffers(1, &vboID1);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID1);
-	glBufferData(GL_ARRAY_BUFFER, vertices[1].size() * sizeof(glm::vec3), &vertices[1][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[1].size() * sizeof(glm::vec2), &uvs[1][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[1].size() * sizeof(glm::vec3), &normals[1][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//remember the drawSize for paintGL function
-	drawSize[2] = vertices[1].size();
-	//load texture and remember texture ID for paintGL function
+		bool res = loadOBJ(objResList[index], vertices, uvs, normals);
+		//vao
+		glBindVertexArray(vao[index]);
 
-	//plane fumfumfum
-	res = loadOBJ("obj/Arc170.obj", vertices[2], uvs[2], normals[2]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID2);
-	glBindVertexArray(vaoID2);  //first VAO
-								
-	glGenBuffers(1, &vboID2);
-	glBindBuffer(GL_ARRAY_BUFFER,vboID2);
-	glBufferData(GL_ARRAY_BUFFER, vertices[2].size() * sizeof(glm::vec3), &vertices[2][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[2].size() * sizeof(glm::vec2), &uvs[2][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[2].size() * sizeof(glm::vec3), &normals[2][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//remember the drawSize for paintGL function
-	drawSize[3] = vertices[2].size();
-	//load texture and remember texture ID for paintGL function
+		//vbo1 vertex_position
+		glGenBuffers(1, &vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), &vertices[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//vbo2 uvbuffer
+		glGenBuffers(1, &uvbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(vec2), &uvs[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		//vbo3 normalcoord
+		glGenBuffers(1, &normalbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(vec3), &normals[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		drawSize[index] = vertices.size();
+	}
 
-	//starfy
-	res = loadOBJ("obj/starfy.obj", vertices[3], uvs[3], normals[3]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID3);
-	glBindVertexArray(vaoID3);  //first VAO
-
-	glGenBuffers(1, &vboID3);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
-	glBufferData(GL_ARRAY_BUFFER, vertices[3].size() * sizeof(glm::vec3), &vertices[3][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[3].size() * sizeof(glm::vec2), &uvs[3][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[3].size() * sizeof(glm::vec3), &normals[3][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//remember the drawSize for paintGL function
-	drawSize[4] = vertices[3].size();
-	//load texture and remember texture ID for paintGL function
-
-	//lightbox
-	res = loadOBJ("obj/lightbox2.obj", vertices[4], uvs[4], normals[4]);
-	//GLuint vaoID1; (throw out!!)
-	glGenVertexArrays(1, &vaoID4);
-	glBindVertexArray(vaoID4);  //first VAO
-
-	glGenBuffers(1, &vboID4);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID4);
-	glBufferData(GL_ARRAY_BUFFER, vertices[4].size() * sizeof(glm::vec3), &vertices[4][0], GL_STATIC_DRAW);
-	//vertex position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//uv
-	//vbo2 uvbuffer
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs[4].size() * sizeof(glm::vec2), &uvs[4][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//vbo3 normalcoord
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals[4].size() * sizeof(glm::vec3), &normals[4][0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//remember the drawSize for paintGL function
-	drawSize[5] = vertices[4].size();
-	//load texture and remember texture ID for paintGL function
-
-	//drawsize[1] earth
-	Texture[1] = loadBMP_custom("texture/earth.bmp");
-	Texture[2] = loadBMP_custom("normal_map/earth_normal.bmp");
-	//drawsize[1] moon
-	Texture[3] = loadBMP_custom("oldtexture/moon.bmp");
-	//drawsize[1] sun
-	Texture[4] = loadBMP_custom("texture/sun.bmp");
-	Texture[5] = loadBMP_custom("texture/jupiter.bmp");
-	//drawsize[2] rock
-	Texture[6] = loadBMP_custom("texture/helicopter.bmp");
-	//drawsize[5] lightbox
-	Texture[7] = loadBMP_custom("texture/lightbox.bmp");
-	//drawsize[3] plane
-	Texture[8] = loadBMP_custom("texture/helicopter.bmp");
-	//drawsize[4] starfy
-	Texture[9] = loadBMP_custom("texture/starfy.bmp");
+	for (i = 0; i < sizeof(txtList) / sizeof(txtList[0]); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		texture[i] = loadBMP_custom(txtResList[i]);
+		glBindTexture(GL_TEXTURE_2D, texture[i]);
+	}
 
 
-/*#####################################Particle##############################################*/
-	glGenVertexArrays(1, &ppVao);
-	glBindVertexArray(ppVao);
-	static const GLfloat g_vertex_buffer_data[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-	};
-	glGenBuffers(1, &billbdvbo);
-	glBindBuffer(GL_ARRAY_BUFFER, billbdvbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	// The VBO containing the positions and sizes of the particles
-	glGenBuffers(1, &partposvbo);
-	glBindBuffer(GL_ARRAY_BUFFER, partposvbo);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, maxnopar * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
-
-	// The VBO containing the colors of the particles
-	glGenBuffers(1, &partcolvbo);
-	glBindBuffer(GL_ARRAY_BUFFER, partcolvbo);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, maxnopar * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
-
+/*#####################################Particle#####EXTRA####################################*/
+	//GLuint modelmatrixvbo;
+	glBindVertexArray(vao[VAO_PARTICAL]);
+	glVertexAttribDivisor(0, 0);
+	glVertexAttribDivisor(1, 0);
+	glVertexAttribDivisor(2, 0);
+	glGenBuffers(1, &ppvbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ppvbo);
+	glBufferData(GL_ARRAY_BUFFER, maxnopar * sizeof(mat4), NULL, GL_STREAM_DRAW);
+	for (i = 0; i < 4; i++) {
+		glEnableVertexAttribArray(i + 3);
+		glVertexAttribPointer(i + 3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(i * sizeof(vec4)));
+		glVertexAttribDivisor(i + 3, 1);
+	}
 	
+}
+
+void getAllUniformLocation() {
+	modelTransformMatrixUniformLocation = glGetUniformLocation(commonProgram, "modelTransformMatrix");
+	projectionMatrixUniformLocation = glGetUniformLocation(commonProgram, "projectionMatrix");
+	rotationMatrixUniformLocation = glGetUniformLocation(commonProgram, "rotationMatrix");
+	viewMatrixUniformLocation = glGetUniformLocation(commonProgram, "viewMatrix");
+	ambientLightUniformLocation = glGetUniformLocation(commonProgram, "ambientLight");
+	eyePositionUniformLocation = glGetUniformLocation(commonProgram, "eyePositionWorld");
+	lightPosition1UniformLocation = glGetUniformLocation(commonProgram, "lightPositionWorld1");
+	lightPosition2UniformLocation = glGetUniformLocation(commonProgram, "lightPositionWorld2");
+	lightPositionrUniformLocation = glGetUniformLocation(commonProgram, "lightPositionWorldr");
+	lightPositionyUniformLocation = glGetUniformLocation(commonProgram, "lightPositionWorldy");
+	lightPositiongUniformLocation = glGetUniformLocation(commonProgram, "lightPositionWorldg");
+	textureID = glGetUniformLocation(commonProgram, "myTextureSampler");
+	textureID2 = glGetUniformLocation(commonProgram, "myTextureSampler2");
+	dd1 = glGetUniformLocation(commonProgram, "difdelta1");
+	ddr = glGetUniformLocation(commonProgram, "difdeltar");
+	ddy = glGetUniformLocation(commonProgram, "difdeltay");
+	ddg = glGetUniformLocation(commonProgram, "difdeltag");
+	sd = glGetUniformLocation(commonProgram, "spedelta");
+
+	normalMapping_flagUniiformLocation = glGetUniformLocation(commonProgram, "normalMapping_flag");
+	multiMapping_flagUniiformLocation = glGetUniformLocation(commonProgram, "multiMapping_flag");
+	fog_flagUniiformLocation = glGetUniformLocation(commonProgram, "fog_flag");
+	fog_ColorUniiformLocation = glGetUniformLocation(commonProgram, "fog_Color");
+	sunUniformLocation = glGetUniformLocation(commonProgram, "sun");
 
 
+	i_ambientLightUniformLocation = glGetUniformLocation(instanceProgram, "ambientLight");
+	i_eyePositionUniformLocation = glGetUniformLocation(instanceProgram, "eyePositionWorld");
+	i_lightPosition1UniformLocation = glGetUniformLocation(instanceProgram, "lightPositionWorld1");
+	i_lightPosition2UniformLocation = glGetUniformLocation(instanceProgram, "lightPositionWorld2");
+	i_dd1 = glGetUniformLocation(instanceProgram, "difdelta1");
+	i_sd = glGetUniformLocation(instanceProgram, "spedelta");
+	i_textureID = glGetUniformLocation(instanceProgram, "myTextureSampler");
+}
+
+void updateModelTransformMatrix() {
+	mat4 m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(20.0, 0.0f, -35.0f));
+	m = glm::scale(m, vec3(3.0f, 3.0f, 3.0f));
+	m = glm::rotate(m, rotz_press_num*0.0005f, vec3(0.1, 1, 0));
+	m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
+	drawnList[DRAWN_SUN].modelTransformMatrix = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(-25.0, -5.0f, -40.0f));
+	m = glm::rotate(m, rotz_press_num*0.01f, vec3(-0.4, 1, 0));
+	m = glm::translate(m, vec3(30.0f, 3.0f, 0.0f));
+	drawnList[DRAWN_MOON].modelTransformMatrix = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(-15.0, -5.0f, -30.0f));
+	m = glm::scale(m, vec3(1.3f, 1.3f, 1.3f));
+	m = glm::rotate(m, 0.5f, vec3(0, 0, 1));
+	m = glm::rotate(m, -1.72f, vec3(1, 0, 0));
+	m = glm::rotate(m, rotz_press_num*0.001f, vec3(0, 0, 1));
+	m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
+	drawnList[DRAWN_EARTH].modelTransformMatrix = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(0.0f, 0.0f, -20.0f));
+	m = glm::translate(m, vec3(lightboxx, lightboxy, lightboxz));
+	m = glm::scale(m, vec3(3.0f, 3.0f, 3.0f));
+	drawnList[DRAWN_LIGHTBOX].modelTransformMatrix = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(-30.0f, -10.0f, -50.0f));
+	m = glm::rotate(m, rotz_press_num * 0.01f, vec3(1, 0, 0));
+	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
+	m = glm::scale(m, vec3(0.002f, 0.002f, 0.002f));
+	drawnList[DRAWN_PLANE].modelTransformMatrix = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(10.0f, -8.0f, -40.0f));
+	m = glm::scale(m, vec3(0.8f, 1.2f, 1.0f));
+	m = glm::rotate(m, 4.712f, vec3(0, 1, 0));
+	drawnList[DRAWN_STAR].modelTransformMatrix = m;
+}
+
+void computeAllDrawnObj() {
+	drawnList[DRAWN_SUN].setContent(VAO_PLANET, TXT_SUN_SUN, TXT_SUN_JUPITER, TXT_NULL, MULTXT, TRUE);
+	drawnList[DRAWN_MOON].setContent(VAO_PLANET, TXT_MOON, TXT_NULL, TXT_NULL, SIGTXT, FALSE);
+	drawnList[DRAWN_EARTH].setContent(VAO_PLANET, TXT_EARTH, TXT_NULL, TXT_NORM_EARTH, NORMTXT, FALSE);
+	drawnList[DRAWN_PLANE].setContent(VAO_PLANE, TXT_HELICOPTER, TXT_NULL, TXT_NULL, SIGTXT, FALSE);
+	drawnList[DRAWN_LIGHTBOX].setContent(VAO_LIGHTBOX, TXT_LIGHTBOX, TXT_NULL, TXT_NULL, SIGTXT, TRUE);
+	drawnList[DRAWN_STAR].setContent(VAO_STAR, TXT_STARFY, TXT_NULL, TXT_NULL, SIGTXT, FALSE);
+	updateModelTransformMatrix();
 }
 
 void SortParticles() {
@@ -774,6 +755,7 @@ void SortParticles() {
 
 void paintGL(void)
 {
+	updateModelTransformMatrix();
 /*#######################################################Particle###############################################*/
 
 	GLint vp[4];
@@ -794,10 +776,10 @@ void paintGL(void)
 		else {
 			xangle = xangle + 0.00005f * deltatime * GLfloat((xcen - xpos));
 			yangle = yangle + 0.00005f * deltatime * GLfloat((ycen - ypos));
-			glm::vec3 direction = glm::vec3(cos(yangle) * sin(xangle), sin(yangle), cos(yangle) * cos(xangle));
-			glm::vec3 right = glm::vec3(sin(xangle - 3.14f / 2.0f), 0, cos(xangle - 3.14f / 2.0f));
-			glm::vec3 up = glm::cross(right, direction);
-			viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), direction, up);
+			vec3 direction = vec3(cos(yangle) * sin(xangle), sin(yangle), cos(yangle) * cos(xangle));
+			vec3 right = vec3(sin(xangle - 3.14f / 2.0f), 0, cos(xangle - 3.14f / 2.0f));
+			vec3 up = glm::cross(right, direction);
+			viewMatrix = glm::lookAt(vec3(lx, ly, lz), direction, up);
 			glutWarpPointer(xcen, ycen);
 		}
 
@@ -808,12 +790,9 @@ void paintGL(void)
 	if (rotz == 1)rotz_press_num++;
 	//lightbox movement
 	lightboxx = 0.0;
-	lightboxy = sin(oldtime/1000.0)*40.0f + 10.0f;
-	lightboxz = cos(oldtime/1000.0)*20.0f - 30.f;
-	//TODO:
-	//Set lighting information, such as position and color of lighting source
-	//Set transformation matrix
-	//Bind different textures
+	lightboxy = sin(oldtime/1000.0f)*40.0f + 10.0f;
+	lightboxz = cos(oldtime/1000.0f)*20.0f - 30.f;
+
 	glClearColor(0.15f, 0.1f, 0.1f, 1.0f); //specify the background color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -821,11 +800,9 @@ void paintGL(void)
 
 	glm::mat4 projectionMatrix = glm::perspective(1.2f, (float)vp[2] / vp[3], 1.0f, 100.0f);
 
+	glUseProgram(skyboxProgram);
 
-
-	glUseProgram(SkyboxprogramID);
-
-	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f));
+	glm::mat4 Skb_ModelMatrix = glm::scale(glm::mat4(1.0f), vec3(10.0f));
 	//remove any translation component of the view matrix
 	//glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 	//glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth / (float)screenWidth, 0.1f, 100.0f);
@@ -833,66 +810,43 @@ void paintGL(void)
 	//glm::mat4 projection = glm::perspective(1.0f, 1.0f, 0.1f, 100.0f);
 
 
-	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "M"), 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "view"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(SkyboxprogramID, "projection"), 1, GL_FALSE, &projectionMatrix[0][0]);
-	GLuint fog_flagUniiformLocation = glGetUniformLocation(SkyboxprogramID, "fog_flag");
-	GLuint fog_ColorUniiformLocation = glGetUniformLocation(SkyboxprogramID, "fog_Color");
+	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "M"), 1, GL_FALSE, &Skb_ModelMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "view"), 1, GL_FALSE, &viewMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "projection"), 1, GL_FALSE, &projectionMatrix[0][0]);
+	GLuint skybox_fog_flagUniiformLocation = glGetUniformLocation(skyboxProgram, "fog_flag");
+	GLuint skybox_fog_ColorUniiformLocation = glGetUniformLocation(skyboxProgram, "fog_Color");
 	//fog_flag = true;
-	glUniform1i(fog_flagUniiformLocation, fog_flag);
-	glUniform3fv(fog_ColorUniiformLocation, 1, &fog_Color[0]);
+	glUniform1i(skybox_fog_flagUniiformLocation, fog_flag);
+	glUniform3fv(skybox_fog_ColorUniiformLocation, 1, &fog_Color[0]);
 	//skybox cube
 	glBindVertexArray(vaoSkybox);
-	glUniform1i(glGetUniformLocation(SkyboxprogramID, "skybox"), 0);
+	glUniform1i(glGetUniformLocation(skyboxProgram, "skybox"), 10);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, Texture[0]);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[0]);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture[10]);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[MAXOBJ]);
 
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 
 
-	glUseProgram(programID);
+	glUseProgram(commonProgram);
 
 	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	glm::mat4 Matrix = glm::mat4(1.0f);
 	glm::vec4 ambientLight1(0.2f, 0.2f, 0.2f, 1.0f);
-	glm::vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
-	glm::vec3 lightPosition2(20.0, 0.0f, -35.0f);
-	glm::vec3 lightPositionr(-4.0, 10.0f, -22.0f);
+	vec3 lightPosition1(lightboxx,lightboxy,lightboxz);
+	vec3 lightPosition2(20.0, 0.0f, -35.0f);
+	vec3 lightPositionr(-4.0, 10.0f, -22.0f);
 	//printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
-	glm::vec3 lightPositiony(-4.0, 9.7f, -22.0f);
-	glm::vec3 lightPositiong(-4.0, 9.4f, -22.0f);
-	glm::vec3 eyePosition(0.0f, 0.0f, 0.0f);
+	vec3 lightPositiony(-4.0, 9.7f, -22.0f);
+	vec3 lightPositiong(-4.0, 9.4f, -22.0f);
+	vec3 eyePosition(0.0f, 0.0f, 0.0f);
 
 	bool normalMapping_flag = false;
 	bool multiMapping_flag = false;
-	GLint modelTransformMatrixUniformLocation = glGetUniformLocation(programID, "modelTransformMatrix");
-	GLint projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");
-	GLint rotationMatrixUniformLocation = glGetUniformLocation(programID, "rotationMatrix");
-	GLint viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
-	GLuint ambientLightUniformLocation = glGetUniformLocation(programID, "ambientLight");
-	GLuint eyePositionUniformLocation = glGetUniformLocation(programID, "eyePositionWorld");
-	GLuint lightPosition1UniformLocation = glGetUniformLocation(programID, "lightPositionWorld1");
-	GLuint lightPosition2UniformLocation = glGetUniformLocation(programID, "lightPositionWorld2");
-	GLuint lightPositionrUniformLocation = glGetUniformLocation(programID, "lightPositionWorldr");
-	GLuint lightPositionyUniformLocation = glGetUniformLocation(programID, "lightPositionWorldy");
-	GLuint lightPositiongUniformLocation = glGetUniformLocation(programID, "lightPositionWorldg");
-	GLuint textureID = glGetUniformLocation(programID, "myTextureSampler");
-	GLuint textureID2 = glGetUniformLocation(programID, "myTextureSampler2");
-	GLuint dd1 = glGetUniformLocation(programID, "difdelta1");
-	GLuint ddr = glGetUniformLocation(programID, "difdeltar");
-	GLuint ddy = glGetUniformLocation(programID, "difdeltay");
-	GLuint ddg = glGetUniformLocation(programID, "difdeltag");
-	GLuint sd = glGetUniformLocation(programID, "spedelta");
 
-	GLuint normalMapping_flagUniiformLocation = glGetUniformLocation(programID, "normalMapping_flag");
-	GLuint multiMapping_flagUniiformLocation = glGetUniformLocation(programID, "multiMapping_flag");
-	fog_flagUniiformLocation = glGetUniformLocation(programID, "fog_flag");
-	fog_ColorUniiformLocation = glGetUniformLocation(programID, "fog_Color");
-	GLuint sunUniiformLocation = glGetUniformLocation(programID, "sun");
 	//fog_flag = true;
 	glUniform1i(fog_flagUniiformLocation, fog_flag);
 	glUniform3fv(fog_ColorUniiformLocation, 1, &fog_Color[0]);
@@ -920,172 +874,65 @@ void paintGL(void)
 	glUniform1f(ddg, gre);
 	glUniform1f(sd, spe);
 
-	//earth
-	glBindVertexArray(vaoID0);
-
-	//modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(-15.0, -5.0f, -20.0f));
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-15.0, -5.0f, -30.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(1.3f, 1.3f, 1.3f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, 0.5f, glm::vec3(0, 0, 1));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, -1.72f, glm::vec3(1, 0, 0));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.001f, glm::vec3(0, 0, 1));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-1.0f, 0.0f, 0.0f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	normalMapping_flag = true;
-	glUniform1i(normalMapping_flagUniiformLocation, normalMapping_flag);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Texture[1]);
-	glUniform1i(textureID, 1);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	glUniform1i(textureID2, 2);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
-
-	normalMapping_flag = false;
-	glUniform1i(normalMapping_flagUniiformLocation, normalMapping_flag);
-
-	//moon
-	glBindVertexArray(vaoID0);
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-25.0, -5.0f, -40.0f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.01f, glm::vec3(-0.4, 1, 0));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(30.0f, 3.0f, 0.0f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, Texture[3]);
-	glUniform1i(textureID, 3);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
-
-	//planet
-	glBindVertexArray(vaoID0);
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(20.0, 0.0f, -35.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num*0.0005f, glm::vec3(0.1, 1, 0));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-1.0f, 0.0f, 0.0f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	multiMapping_flag = true;
-	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, Texture[4]);
-	glUniform1i(textureID, 4);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, Texture[5]);
-	glUniform1i(textureID2, 5);
-
-	bool sun = true;
-	glUniform1i(sunUniiformLocation, sun);
-
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[1]);
-
-	multiMapping_flag = false;
-	glUniform1i(multiMapping_flagUniiformLocation, multiMapping_flag);
-	sun = false;
-	glUniform1i(sunUniiformLocation, sun);
-
-
-	//
-	//rock
-
-	glBindVertexArray(vaoID1);
-	modelTransformMatrix = glm::mat4();
-	//modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(5.0f, 0.0f, -10.0f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(carx, -2.0f, carz));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, Texture[6]);
-	glUniform1i(textureID, 6);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[2]);
-
-
-	//lightbox
-	glBindVertexArray(vaoID4);
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(lightboxx, lightboxy, lightboxz));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, roty_press_num*0.1f, glm::vec3(0, 1, 0));
-	//modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, Texture[7]);
-	glUniform1i(textureID, 7);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[5]);
-
-	//plane
-	glBindVertexArray(vaoID2);
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(-30.0f, -10.0f, -50.0f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, rotz_press_num * 0.01f, glm::vec3(1, 0, 0));
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(0.0f, planeradius, 0.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.002f, 0.002f, 0.002f));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, Texture[8]);
-	glUniform1i(textureID, 8);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[3]);
-
-	
-	//starvy
-	glBindVertexArray(vaoID3);
-	modelTransformMatrix = glm::mat4();
-	modelTransformMatrix = glm::translate(modelTransformMatrix, glm::vec3(10.0f, -8.0f, -40.0f));
-	modelTransformMatrix = glm::scale(modelTransformMatrix, glm::vec3(0.8f, 1.2f, 1.0f));
-	modelTransformMatrix = glm::rotate(modelTransformMatrix, 4.712f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-
-	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, Texture[9]);
-	glUniform1i(textureID, 9);
-	glDrawArrays(GL_TRIANGLES, 0, drawSize[4]);
+	int i;
+	for (i = 0; i < sizeof(drawnListIndex) / sizeof(drawnListIndex[0]); i++) {
+		DrawnObj o = drawnList[i];
+		glBindVertexArray(vao[o.vao]);
+		glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &o.modelTransformMatrix[0][0]);
+		glUniform1i(sunUniformLocation, o.isLightSource);
+		switch (o.mode) {
+		case NOTXT:
+			glUniform1i(normalMapping_flagUniiformLocation, false);
+			glUniform1i(multiMapping_flagUniiformLocation, false);
+			break;
+		case SIGTXT:
+			glUniform1i(normalMapping_flagUniiformLocation, false);
+			glUniform1i(multiMapping_flagUniiformLocation, false);
+			glUniform1i(textureID, o.texture);
+			break;
+		case MULTXT:
+			glUniform1i(normalMapping_flagUniiformLocation, false);
+			glUniform1i(multiMapping_flagUniiformLocation, true);
+			glUniform1i(textureID, o.texture);
+			glUniform1i(textureID2, o.texture2);
+			break;
+		case NORMTXT:
+			glUniform1i(normalMapping_flagUniiformLocation, true);
+			glUniform1i(multiMapping_flagUniiformLocation, false);
+			glUniform1i(textureID, o.texture);
+			glUniform1i(textureID2, o.norm_texture);
+		}
+		glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
+	}
 
 /*#######################################################Particle###############################################*/
-/*
-	glUseProgram(programID2);
-	viewMatrixUniformLocation = glGetUniformLocation(programID2, "viewMatrix");
-	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
-	projectionMatrixUniformLocation = glGetUniformLocation(programID2, "projectionMatrix");
-	glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
-	glBindVertexArray(ppVao);
-	modelTransformMatrix = glm::mat4(1.0f);
-	modelTransformMatrixUniformLocation = glGetUniformLocation(programID2, "modelTransformMatrix");
-	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
+
+	glUseProgram(instanceProgram);
+	GLuint i_viewMatrixUniformLocation = glGetUniformLocation(instanceProgram, "viewMatrix");
+	glUniformMatrix4fv(i_viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
+	GLuint i_projectionMatrixUniformLocation = glGetUniformLocation(instanceProgram, "projectionMatrix");
+	glUniformMatrix4fv(i_projectionMatrixUniformLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
+	glBindVertexArray(vao[VAO_PARTICAL]);
+	mat4 i_modelTransformMatrix = glm::mat4(1.0f);
+	i_modelTransformMatrix = glm::translate(i_modelTransformMatrix, vec3(20.0, 0.0f, -35.0f));
+	GLuint i_modelTransformMatrixUniformLocation = glGetUniformLocation(instanceProgram, "modelTransformMatrix");
+	glUniformMatrix4fv(i_modelTransformMatrixUniformLocation, 1, GL_FALSE, &i_modelTransformMatrix[0][0]);
 
 	int newparticles = (int)(delta*3000.0);
 	if (newparticles > (int)(0.005f*3000.0))newparticles = (int)(0.005f*3000.0);
 
 	for (int i = 0; i<newparticles; i++) {
 		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = 10.0f; 
-		ParticlesContainer[particleIndex].pos = glm::vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
+		ParticlesContainer[particleIndex].life = 100.0f; 
+		//ParticlesContainer[particleIndex].pos = vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
 
-		float spread = 0.0f;
-		glm::vec3 maindir = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec3 randomdir = glm::vec3(
-			(rand() % 2000 - 1000.0f) / 1000.0f,
-			(rand() % 2000 - 1000.0f) / 1200.0f,
-			(rand() % 2000 - 1000.0f) / 1000.0f
-		);
+		ParticlesContainer[particleIndex].angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].w = 0.01f + 0.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].selfRotW = 0.01f + 0.1f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 
-		ParticlesContainer[particleIndex].speed = maindir + randomdir*spread;
-
-		ParticlesContainer[particleIndex].r = 255;
-		ParticlesContainer[particleIndex].g = 255;
-		ParticlesContainer[particleIndex].b = 255;
-		ParticlesContainer[particleIndex].a = 255;
-
-		ParticlesContainer[particleIndex].size = (rand() % 2000 - 1000.0f) / 10000.0f + 0.001f;
+		ParticlesContainer[particleIndex].size = 0.05f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].radius = 35.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 
 	}
 
@@ -1102,20 +949,20 @@ void paintGL(void)
 			if (p.life > 0.0f) {
 
 				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, -1.5f, 0.0f) * (float)delta * 0.5f;
-				p.pos += p.speed * (float)delta;
+				p.angle += p.w * (float)delta;
+				p.selfRotAngle += p.selfRotW * (float)delta;
+				p.pos = vec3(sin(p.angle) * p.radius, 0.0f, cos(p.angle) * p.radius);
 				p.cameradistance = glm::length(p.pos - eyePosition);
-				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
+				//ParticlesContainer[i].pos += vec3(0.0f,10.0f, 0.0f) * (float)delta;
+
+				mat4 m = mat4(1.0f);
+				m = glm::translate(m, p.pos);
+				//m = glm::translate(m, vec3(-25.0, -5.0f, -40.0f));
+				m = glm::scale(m, vec3(p.size));
+				m = glm::rotate(m, p.selfRotAngle, vec3(-0.4, 1, 0));
 
 				// Fill the GPU buffer
-				g_par_position_size_data[4 * parcnt + 0] = p.pos.x + (rand() % 2000 - 1000.0f) / 100000.0f;
-				g_par_position_size_data[4 * parcnt + 1] = p.pos.y;
-				g_par_position_size_data[4 * parcnt + 2] = p.pos.z + (rand() % 2000 - 1000.0f) / 100000.0f;
-				g_par_position_size_data[4 * parcnt + 3] = p.size;
-				g_par_color_data[4 * parcnt + 0] = p.r;
-				g_par_color_data[4 * parcnt + 1] = p.g;
-				g_par_color_data[4 * parcnt + 2] = p.b;
-				g_par_color_data[4 * parcnt + 3] = p.a;
+				g_par_position_size_data[parcnt] = m;
 
 			}
 			else {
@@ -1130,39 +977,28 @@ void paintGL(void)
 
 	SortParticles();
 
-
-	glBindBuffer(GL_ARRAY_BUFFER, partposvbo);
-	glBufferData(GL_ARRAY_BUFFER, maxnopar * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
-	glBufferSubData(GL_ARRAY_BUFFER, 0, parcnt * sizeof(GLfloat) * 4, g_par_position_size_data);
-
-	glBindBuffer(GL_ARRAY_BUFFER, partcolvbo);
-	glBufferData(GL_ARRAY_BUFFER, maxnopar * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
-	glBufferSubData(GL_ARRAY_BUFFER, 0, parcnt * sizeof(GLubyte) * 4, g_par_color_data);
-
-	// 1rst attribute buffer : vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, billbdvbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);// array buffer offset	);
-
-	// 2nd attribute buffer : positions of particles' centers
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, partposvbo);
-	glVertexAttribPointer(	1, 	4, 	GL_FLOAT, 	GL_FALSE,	0, 	(void*)0 );
-
-	// 3rd attribute buffer : particles' colors
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, partcolvbo);
-	glVertexAttribPointer(	2, 	4, 	GL_UNSIGNED_BYTE, 	GL_TRUE, 	0, 	(void*)0 );
-
-	glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-	glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
-	glVertexAttribDivisor(2, 1); // color : one per quad -> 1
+	glBindBuffer(GL_ARRAY_BUFFER, ppvbo);
+	glBufferData(GL_ARRAY_BUFFER, maxnopar * sizeof(mat4), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+	glBufferSubData(GL_ARRAY_BUFFER, 0, parcnt * sizeof(mat4), g_par_position_size_data);
 
 
+	//fog_flag = true;
+	glUniform1i(fog_flagUniiformLocation, fog_flag);
+	glUniform3fv(fog_ColorUniiformLocation, 1, &fog_Color[0]);
+
+
+	glUniform3fv(i_ambientLightUniformLocation, 1, &ambientLight1[0]);
+	glUniform3fv(i_lightPosition1UniformLocation, 1, &lightPosition1[0]);
+	glUniform3fv(i_lightPosition2UniformLocation, 1, &lightPosition2[0]);
+
+	glUniform1f(i_dd1, ddd);
+	glUniform1f(i_sd, spe);
+
+	glUniform1i(i_textureID, TXT_PARTICAL);
 								 // This is equivalent to :
 								 // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, parcnt);
-*/
+	glDrawArraysInstanced(GL_TRIANGLES, 0, drawSize[VAO_PARTICAL], parcnt);
+	
 /*###########################################################Particle####################################################*/
 
 	glFlush();
@@ -1175,10 +1011,12 @@ void initializedGL(void)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
-	installShaders();
-	installParticleShaders();
-	installSkyboxShaders();
+	commonProgram = installShaders("VertexShaderCode.glsl", "FragmentShaderCode.glsl");
+	skyboxProgram = installShaders("SkyboxVertexShaderCode.glsl", "SkyboxFragmentShaderCode.glsl");
+	instanceProgram = installShaders("InstanceVertexShaderCode.glsl", "InstanceFragmentShaderCode.glsl");
 	sendDataToOpenGL();
+	getAllUniformLocation();
+	computeAllDrawnObj();
 }
 
 int main(int argc, char *argv[])
@@ -1207,4 +1045,15 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 
 	return 0;
+}
+
+void DrawnObj::setContent(GLuint aVao, GLuint aTexture, GLuint aTexture2, GLuint aNorm_texture, TXTMode aMode, bool aIsLightSource)
+{
+	vao = aVao;
+	texture = aTexture;
+	texture2 = aTexture2;
+	norm_texture = aNorm_texture;
+	mode = aMode;
+	modelTransformMatrix = mat4(1.0f);
+	isLightSource = aIsLightSource;
 }

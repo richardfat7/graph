@@ -19,6 +19,7 @@ uniform float difdeltar;
 uniform float difdeltay;
 uniform float difdeltag;
 uniform float spedelta;
+uniform mat4 modelTransformMatrix;
 
 uniform bool normalMapping_flag;
 uniform bool multiMapping_flag;
@@ -33,7 +34,9 @@ void main()
 	vec3 normal = normalize(normalWorld);
 	if (normalMapping_flag){
 		normal = texture(myTextureSampler2, UV).rgb;
-		normal = normalize(normal * 2.0 - 1.0);
+		normal = normal * 2.0f - 1.0f;
+		normal = normalize(normal + normalWorld);
+		//normal = (modelTransformMatrix * vec4(normal, 1.0f)).xyz;
 	}
 	
 	vec4 AmbLightCol1 = ambientLight1;
@@ -41,12 +44,12 @@ void main()
 	vec3 lightVectorWorld1 = normalize(lightPositionWorld1 - vertexPositionWorld);
 	float brightness = dot(lightVectorWorld1, normal);
 	vec4 DifBrightness1 = vec4(brightness, brightness, brightness, 1.0f);
-	float Diflightrgb1 = clamp(0.0f + difdelta1, 0 , 1); 
+	float Diflightrgb1 = clamp(0.5f + difdelta1, 0 , 1); 
 	vec4 DifLightCol1 = vec4(Diflightrgb1, Diflightrgb1 , Diflightrgb1, 1.0f);
 
 	vec3 lightVectorWorld2 = normalize(lightPositionWorld2 - vertexPositionWorld);
-	brightness = dot(lightVectorWorld2, normal);
-	if(sun == true)brightness = brightness * -0.7;
+	brightness = clamp(dot(lightVectorWorld2, normal), 0, 1);
+	if(sun == true) brightness = 0.7f * dot(lightVectorWorld2, -normal);
 	vec4 DifBrightness2 = vec4(brightness, brightness, brightness, 1.0f);
 	vec4 DifLightCol2 = vec4(3.0f, 3.0f, 3.0f, 1.0f);
 
@@ -94,6 +97,6 @@ void main()
 				 MatDifCol * DifLightColy * DifBrightnessy +
 				 MatDifCol * DifLightColg * DifBrightnessg +
 				 MatSpeCol * SpeLightCol * pow(SpeBrightness,50);
-
+	if(sun == true) finalColor = MatAmbCol;
 	fogfinalColor = mix (vec4(fog_Color, 1.0f), finalColor, visibility);
 }
