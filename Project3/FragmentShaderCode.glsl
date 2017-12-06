@@ -31,7 +31,7 @@ out vec4 fogfinalColor;
 void main()
 {
 	vec3 normal = normalize(normalWorld);
-	if (!normalMapping_flag){
+	if (normalMapping_flag){
 		normal = texture(myTextureSampler2, UV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);
 	}
@@ -76,8 +76,8 @@ void main()
 	vec4 MatAmbCol;
 	vec4 MatDifCol;
 	if(multiMapping_flag){
-		MatAmbCol = vec4((0.4 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
-		MatDifCol = vec4((0.4 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatAmbCol = vec4((0.8 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
+		MatDifCol = vec4((0.8 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 	}
 	else{
 		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);

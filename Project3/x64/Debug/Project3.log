@@ -1,13 +1,14 @@
 ﻿  main.cpp
-c:\users\hei\documents\graph\project3\main.cpp(807): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(808): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(846): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(941): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(957): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(981): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1003): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1019): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1033): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1047): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.exe
-  Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.pdb (Partial PDB)
+c:\users\hei\documents\graph\project3\main.cpp(41): error C2872: 'right': ambiguous symbol
+  c:\users\hei\documents\graph\project3\main.cpp(40): note: could be 'glm::vec3 right'
+  c:\program files (x86)\vc\include\ios(315): note: or       'std::ios_base &std::right(std::ios_base &)'
+c:\users\hei\documents\graph\project3\main.cpp(811): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(812): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(850): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(945): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(961): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(985): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1007): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1023): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1037): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1051): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data

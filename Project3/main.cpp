@@ -36,6 +36,9 @@ float planeradius=15.0f;
 int justenter = 0;
 bool fog_flag = false;
 glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+glm::vec3 direction = glm::vec3(cos(yangle) * sin(xangle), sin(yangle), cos(yangle) * cos(xangle));
+glm::vec3 right1 = glm::vec3(sin(xangle - 3.14f / 2.0f), 0.0f, cos(xangle - 3.14f / 2.0f));
+glm::vec3 up = glm::cross(right1, direction);
 
 glm::vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
 
@@ -799,6 +802,7 @@ void paintGL(void)
 		}
 
 	}
+	viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), direction, up);
 	//planet movement
 	oldtime = newtime;
 	if (rotz == 1)rotz_press_num++;
