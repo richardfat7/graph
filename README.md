@@ -11,7 +11,7 @@ around the Universe. No translation and zoom should happen for Skybox.
 - [ ] Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
 floating rocks should have random sizes and locations in a limited range.
 
-- [] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
+- [ ] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
 vehicle D and every rock in G; Conduct multiple texture mapping for planet C. Textures used for A, B, C, D
 and G should be different from each other. You can use any texture you like, even a chocolate or strawberry.
 
@@ -55,23 +55,29 @@ different fog density and visibility, shown as figures. Fog color should be able
 
 
 BONUS
-[X] 1. Add another visible light source. All basic light rendering results should then be changed according to the
+- [X] 1. Add another visible light source. All basic light rendering results should then be changed according to the
 summation property of the Phong Illumination Model. (4 points)
-2. Collision Detection. Detect the collision between any two objects. Once the collision happens, disable the
+
+- [ ] 2. Collision Detection. Detect the collision between any two objects. Once the collision happens, disable the
 rendering of one object to make it disappear. You can choose Landmark distance/Bounding
 box/Bounding sphere. (Marking depends on the elegance of your algorithm. Full mark is 6 points)
-3. Provide extra viewpoints on the space vehicle. By doing this, we can really enjoy our space travel and
+
+- [ ] 3. Provide extra viewpoints on the space vehicle. By doing this, we can really enjoy our space travel and
 have a close touch with the planet and floating rocks. (4 points)
-[ ]4. Represent the real-time trajectory of space vehicle D with a string of stars (F). You need to record and
+
+- [ ] 4. Represent the real-time trajectory of space vehicle D with a string of stars (F). You need to record and
 update several real-time positions of the vehicle and render stars on those positions. Shown as the
 following figure. (5 points)
-[ ]5. Generate the asteroid ring cloud with more than 5000 floating rocks. Some basic generation method will
+
+- [ ] 5. Generate the asteroid ring cloud with more than 5000 floating rocks. Some basic generation method will
 becomes un-renderable as so many repeated objects need to be rendered at the same time. So you are
 encouraged to explore the amazing instanced rendering. Code of instancing will be checked during
  demonstration. (6 points)
-[ ]6. Use more “advanced” texture mappings to make objects more realistic, such as shadow mapping
+ 
+- [ ] 6. Use more “advanced” texture mappings to make objects more realistic, such as shadow mapping
 environment mapping, displacement mapping etc. (7 points)
-[ ]7. Play background music with IrrKlang Library. (2 points)
+
+- [ ] 7. Play background music with IrrKlang Library. (2 points)
 
 index		texture
 ---------------------------------------
