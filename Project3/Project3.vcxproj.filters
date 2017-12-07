@@ -18,19 +18,19 @@
     <None Include="FragmentShaderCode.glsl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="FragmentShaderCode2.glsl">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="VertexShaderCode.glsl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="VertexShaderCode2.glsl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="SkyboxFragmentShaderCode.glsl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="SkyboxVertexShaderCode.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="InstanceVertexShaderCode.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="InstanceFragmentShaderCode.glsl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

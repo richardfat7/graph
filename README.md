@@ -8,7 +8,7 @@ load any possible objects or images as your planets, vehicle.
 - [X] Create a Skybox (H) as the background and it should rotate accordingly when you change viewpoint and look
 around the Universe. No translation and zoom should happen for Skybox.
 
-- [ ] Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
+- [X] Generate an asteroid ring cloud (G) which contains at least 200 random floating rocks around planet C. Those
 floating rocks should have random sizes and locations in a limited range.
 
 - [X] Conduct single texture mapping and normal mapping for planet A; single texture mapping for planet B, space
@@ -29,9 +29,9 @@ box at the light position. Basically, only pure color is required for the light 
 
 - [X] For space vehicle D, it should basically move around A at a designed orbit.
 
-- [ ] For asteroid ring cloud G, all the floating rocks in it should move around planet C simultaneously.
+- [X] For asteroid ring cloud G, all the floating rocks in it should move around planet C simultaneously.
 
-- [ ] For viewpoint switch, at least 3 distinctive viewpoints (such as –X, +X, +Y axis) should be provided as
+- [X] For viewpoint switch, at least 3 distinctive viewpoints (such as –X, +X, +Y axis) should be provided as
 choices so that we can explore your Universe from different aspects.
 
 - [X] Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
