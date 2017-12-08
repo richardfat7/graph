@@ -60,6 +60,9 @@ using glm::mat4;
 #define DRAWN_LIGHTBOX		4
 #define DRAWN_STAR			5
 
+#define RG_VIEWPOINT		1
+#define RG_FOGCOLOR			2
+
 typedef enum txtMode { NOTXT, SIGTXT, MULTXT, NORMTXT } TXTMode;
 
 class DrawnObj {
@@ -134,7 +137,8 @@ GLint modelTransformMatrixUniformLocation, projectionMatrixUniformLocation, rota
 	fog_flagUniiformLocation, fog_ColorUniiformLocation, sunUniformLocation,
 	i_textureID,
 	i_ambientLightUniformLocation, i_eyePositionUniformLocation, i_lightPosition1UniformLocation, i_lightPosition2UniformLocation,
-	i_dd1, i_sd;
+	i_dd1, i_sd,
+	i_fog_flagUniiformLocation, i_fog_ColorUniiformLocation;
 
 size_t drawSize[MAXOBJ + 1];
 // Could define the Vao&Vbo and interaction parameter here
@@ -148,10 +152,10 @@ int xpos, ypos, xcen, ycen;
 float xx = 1.0, lx = 0.0f, ly = 3.0f, lz = 10.0f, carx = 0.0f, carz = 0.0f, carangle = 0.0f, a=0.0f,b=0.0f,c=0.0f;
 float lightboxx = 0.0, lightboxy = 0.0, lightboxz = 0.0;
 float ddd = 0.0f, red = 0.0f, yel = 0.0f, gre = 0.0f, rc =0.0f, spe = 0.0f;
-float planeradius=5.0f, planerot = 1.0f, planespeed = 0.1f;
+float planeradius=5.0f, planerot = 1.0f;
 float fov = 1.2f;
 int justenter = 0;
-bool fog_flag = false;
+int fog_flag = false;
 
 mat4 viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 mat4 viewMatrix2 = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
@@ -161,6 +165,15 @@ mat4 planeMat = mat4(1.0f);
 
 vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
 
+
+// GLUI Control
+
+GLUI_Panel *panelV, *panelVP, *panelF;
+GLUI_RadioGroup *rg, *rg2;
+
+float planespeed = 0.1f;
+int viewpointChoice = 0;
+int fog_ColorChoice = 0;
 
 struct Particle {
 	vec3 pos;
@@ -647,7 +660,6 @@ void sendDataToOpenGL()
 	std::vector<vec3> vertices[5];
 	std::vector<vec2> uvs[5];
 	std::vector<vec3> normals[5];
-	GLuint vboID0, vboID1, vboID2, vboID3, vboID4;	
 
 	int i;
 
@@ -742,6 +754,8 @@ void getAllUniformLocation() {
 	i_dd1 = glGetUniformLocation(instanceProgram, "difdelta1");
 	i_sd = glGetUniformLocation(instanceProgram, "spedelta");
 	i_textureID = glGetUniformLocation(instanceProgram, "myTextureSampler");
+	i_fog_flagUniiformLocation = glGetUniformLocation(instanceProgram, "fog_flag");
+	i_fog_ColorUniiformLocation = glGetUniformLocation(instanceProgram, "fog_Color");
 }
 
 void updateModelTransformMatrix() {
@@ -1042,6 +1056,9 @@ void paintGL(void)
 	GLuint i_modelTransformMatrixUniformLocation = glGetUniformLocation(instanceProgram, "modelTransformMatrix");
 	glUniformMatrix4fv(i_modelTransformMatrixUniformLocation, 1, GL_FALSE, &i_modelTransformMatrix[0][0]);
 
+	glUniform1i(i_fog_flagUniiformLocation, fog_flag);
+	glUniform3fv(i_fog_ColorUniiformLocation, 1, &fog_Color[0]);
+
 	// Simulate all particles
 	int parcnt = 0;
 	for (int i = 0; i<maxnopar; i++) {
@@ -1124,7 +1141,7 @@ void generateAllPartical() {
 		ParticlesContainer[particleIndex].angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 		ParticlesContainer[particleIndex].selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 		ParticlesContainer[particleIndex].w = 0.01f + 0.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].selfRotW = 0.01f + 0.1f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].selfRotW = 0.03f + 0.3f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 
 		ParticlesContainer[particleIndex].size = 0.05f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 		ParticlesContainer[particleIndex].radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
@@ -1159,6 +1176,52 @@ void myGlutReshape(int x, int y)
 	//xy_aspect = (float)tw / (float)th;
 
 	glutPostRedisplay();
+}
+
+void gluiCallback(int id) {
+	int i;
+	switch (id) {
+	case RG_VIEWPOINT:
+		i = rg->get_int_val();
+		if (i == 0) {
+			viewcon = -1;
+			planeview = 0;
+			lx = 0.0f;
+			ly = 3.0f;
+			lz = 10.0f;
+			xangle = 3.14f, yangle = 0.0f;
+		}
+		if (i == 1) {
+			viewcon = -1;
+			planeview = 0;
+			lx = 0.0f;
+			ly = 3.0f;
+			lz = -30.0f;
+			xangle = 1.72f, yangle = 0.0f;
+		}
+		if (i == 2) {
+			viewcon = -1;
+			planeview = 0;
+			lx = 0.0f;
+			ly = 20.0f;
+			lz = -20.0f;
+			xangle = 0.0f, yangle = -1.72f;
+		}
+		break;
+	case RG_FOGCOLOR:
+		i = rg2->get_int_val();
+		switch (i) {
+		case 0:
+			fog_Color = vec3(0.0f, 0.5f, 1.0f);
+			break;
+		case 1:
+			fog_Color = vec3(0.7f, 0.7f, 0.7f);
+			break;
+		case 2:
+			fog_Color = vec3(0.2f, 0.0f, 0.2f);
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -1224,6 +1287,19 @@ int main(int argc, char *argv[])
 
 
 	GLUI* glui = GLUI_Master.create_glui_subwindow(mainWin, GLUI_SUBWINDOW_RIGHT);
+	panelV = glui->add_panel("Vehicle Control", 1);
+	glui->add_spinner_to_panel(panelV, "Vehicle Speed", GLUI_SPINNER_FLOAT, &planespeed)->set_float_limits(-6.29f, 6.29f, GLUI_LIMIT_CLAMP);
+	panelVP = glui->add_panel("View Point Control", 1);
+	rg = glui->add_radiogroup_to_panel(panelVP, &viewpointChoice, RG_VIEWPOINT, &gluiCallback);
+	glui->add_radiobutton_to_group(rg, "Front View");
+	glui->add_radiobutton_to_group(rg, "Inside View");
+	glui->add_radiobutton_to_group(rg, "Top View");
+	panelF = glui->add_panel("Fog Control", 1);
+	glui->add_checkbox_to_panel(panelF, "Enable fog", &fog_flag);
+	rg2 = glui->add_radiogroup_to_panel(panelF, &fog_ColorChoice, RG_FOGCOLOR, &gluiCallback);
+	glui->add_radiobutton_to_group(rg2, "Sky Blue");
+	glui->add_radiobutton_to_group(rg2, "Sad Grey");
+	glui->add_radiobutton_to_group(rg2, "Posion Purple");
 	glui->set_main_gfx_window(mainWin);
 
 	glutMainLoop();

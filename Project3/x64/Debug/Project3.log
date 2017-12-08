@@ -1,4 +1,5 @@
 ﻿  main.cpp
+<<<<<<< 1a195d41f92c164337ead89b39307854aa0951c6
 c:\users\hei\documents\graph\project3\dependencies\glui\glui.h(880): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID4': unreferenced local variable
 c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID0': unreferenced local variable
@@ -11,3 +12,12 @@ c:\users\hei\documents\graph\project3\main.cpp(1026): warning C4267: 'argument':
 c:\users\hei\documents\graph\project3\main.cpp(1106): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.exe
   Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.pdb (Partial PDB)
+=======
+c:\github\graph\project3\dependencies\glui\glui.h(880): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+c:\github\graph\project3\main.cpp(934): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(1012): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(1032): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(1115): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.exe
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.pdb (Partial PDB)
+>>>>>>> add glui content
