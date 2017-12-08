@@ -6,7 +6,6 @@ c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID2': unreferenced lo
 c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID1': unreferenced local variable
 c:\github\graph\project3\main.cpp(899): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 c:\github\graph\project3\main.cpp(977): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\github\graph\project3\main.cpp(1002): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
 c:\github\graph\project3\main.cpp(1054): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.exe
   Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.pdb (Partial PDB)

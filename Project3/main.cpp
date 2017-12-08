@@ -996,11 +996,11 @@ void paintGL(void)
 
 		Particle& p = ParticlesContainer[i]; // shortcut
 
-		if (p.life > 0.0f) {
+		//if (p.life > 0.0f) {
 
-			// Decrease life
-			p.life -= delta;
-			if (p.life > 0.0f) {
+		//	// Decrease life
+		//	p.life -= delta;
+		//	if (p.life > 0.0f) {
 
 				// Simulate simple physics : gravity only, no collisions
 				p.angle += p.w * (float)delta;
@@ -1018,18 +1018,18 @@ void paintGL(void)
 				// Fill the GPU buffer
 				g_par_position_size_data[parcnt] = m;
 
-			}
-			else {
-				// Particles that just died will be put at the end of the buffer in SortParticles();
-				p.cameradistance = -1.0f;
-			}
+			//}
+			//else {
+			//	// Particles that just died will be put at the end of the buffer in SortParticles();
+			//	p.cameradistance = -1.0f;
+			//}
 
 			parcnt++;
-
-		}
+/*
+		}*/
 	}
 
-	SortParticles();
+	//SortParticles();
 
 	glBindBuffer(GL_ARRAY_BUFFER, ppvbo);
 	glBufferData(GL_ARRAY_BUFFER, maxnopar * sizeof(mat4), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
