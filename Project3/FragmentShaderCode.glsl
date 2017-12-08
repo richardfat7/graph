@@ -4,6 +4,7 @@ in vec2 UV;
 in vec3 normalWorld;
 in vec3 vertexPositionWorld;
 in float visibility;
+in mat4 viewMatrix2;
 
 uniform vec4 ambientLight1;
 uniform vec3 lightPositionWorld1;
@@ -14,6 +15,7 @@ uniform vec3 lightPositionWorldg;
 uniform vec3 eyePositionWorld;
 uniform sampler2D myTextureSampler;
 uniform sampler2D myTextureSampler2;
+uniform samplerCube cube_texture;
 uniform float difdelta1;
 uniform float difdeltar;
 uniform float difdeltay;
@@ -23,6 +25,7 @@ uniform mat4 modelTransformMatrix;
 
 uniform bool normalMapping_flag;
 uniform bool multiMapping_flag;
+uniform bool envMapping_flag;
 uniform bool sun;
 
 uniform vec3 fog_Color;
@@ -78,25 +81,27 @@ void main()
 
 	vec4 MatAmbCol;
 	vec4 MatDifCol;
+	vec4 finalColor;
 	if(multiMapping_flag){
 		MatAmbCol = vec4((0.8 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 		MatDifCol = vec4((0.8 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 	}
+
 	else{
 		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
 		MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
 		}
 
 	vec4 MatSpeCol = vec4(0.3f, 0.3f, 0.3f, 1.0f);
-
-	if(sun==true)AmbLightCol1;
-	vec4 finalColor = MatAmbCol * AmbLightCol1+
-				 MatDifCol * DifLightCol1 * DifBrightness1 +
-				 MatDifCol * DifLightCol2 * DifBrightness2 +
-				 MatDifCol * DifLightColr * DifBrightnessr +
-				 MatDifCol * DifLightColy * DifBrightnessy +
-				 MatDifCol * DifLightColg * DifBrightnessg +
-				 MatSpeCol * SpeLightCol * pow(SpeBrightness,50);
+	if(!envMapping_flag){
+		finalColor = MatAmbCol * AmbLightCol1+
+					 MatDifCol * DifLightCol1 * DifBrightness1 +
+					 MatDifCol * DifLightCol2 * DifBrightness2 +
+					 MatDifCol * DifLightColr * DifBrightnessr +
+					 MatDifCol * DifLightColy * DifBrightnessy +
+					 MatDifCol * DifLightColg * DifBrightnessg +
+					 MatSpeCol * SpeLightCol * pow(SpeBrightness,50);
+	}
 	if(sun == true) finalColor = MatAmbCol;
 	fogfinalColor = mix (vec4(fog_Color, 1.0f), finalColor, visibility);
 }

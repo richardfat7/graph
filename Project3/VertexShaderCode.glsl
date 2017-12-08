@@ -15,6 +15,7 @@ out vec2 UV;
 out vec3 normalWorld;
 out vec3 vertexPositionWorld;
 out float visibility;
+out mat4 viewMatrix2;
 
 void main()
 {
@@ -37,4 +38,5 @@ void main()
 		visibility = clamp (visibility , 0 ,1);
 	}
 
+	viewMatrix2 = viewMatrix;
 }

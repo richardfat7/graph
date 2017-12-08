@@ -63,7 +63,7 @@ using glm::mat4;
 #define RG_VIEWPOINT		1
 #define RG_FOGCOLOR			2
 
-typedef enum txtMode { NOTXT, SIGTXT, MULTXT, NORMTXT } TXTMode;
+typedef enum txtMode { NOTXT, SIGTXT, MULTXT, NORMTXT, ENVTXT } TXTMode;
 
 class DrawnObj {
 	public:
@@ -120,8 +120,8 @@ char* txtResList[MAXTEXTURE] = {
 int drawnListIndex[MAXDRAWNOBJ] = {
 	DRAWN_SUN,
 	DRAWN_MOON,
-	DRAWN_EARTH, 
-	DRAWN_PLANE, 
+	DRAWN_EARTH,
+	DRAWN_PLANE,
 	DRAWN_LIGHTBOX,
 	DRAWN_STAR
 };
@@ -133,7 +133,7 @@ GLint modelTransformMatrixUniformLocation, projectionMatrixUniformLocation, rota
 	lightPositionrUniformLocation, lightPositionyUniformLocation, lightPositiongUniformLocation,
 	textureID, textureID2,
 	dd1, ddr, ddy, ddg, sd,
-	normalMapping_flagUniiformLocation, multiMapping_flagUniiformLocation,
+	normalMapping_flagUniiformLocation, multiMapping_flagUniiformLocation, envMapping_flagUniiformLocation,
 	fog_flagUniiformLocation, fog_ColorUniiformLocation, sunUniformLocation,
 	i_textureID,
 	i_ambientLightUniformLocation, i_eyePositionUniformLocation, i_lightPosition1UniformLocation, i_lightPosition2UniformLocation,
@@ -742,6 +742,7 @@ void getAllUniformLocation() {
 
 	normalMapping_flagUniiformLocation = glGetUniformLocation(commonProgram, "normalMapping_flag");
 	multiMapping_flagUniiformLocation = glGetUniformLocation(commonProgram, "multiMapping_flag");
+	envMapping_flagUniiformLocation = glGetUniformLocation(commonProgram, "envMapping_flag");
 	fog_flagUniiformLocation = glGetUniformLocation(commonProgram, "fog_flag");
 	fog_ColorUniiformLocation = glGetUniformLocation(commonProgram, "fog_Color");
 	sunUniformLocation = glGetUniformLocation(commonProgram, "sun");
@@ -791,22 +792,21 @@ void updateModelTransformMatrix() {
 	drawnList[DRAWN_LIGHTBOX].modelTransformMatrix = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
-	m = glm::rotate(m, planerot, vec3(1, 0, 0));
-	m = glm::translate(m, vec3(0.0f, planeradius, -2.0f));
+	m = glm::rotate(m, planerot, vec3(0, 0, -1));
+	m = glm::translate(m, vec3(0.0f, planeradius, -0.0f));
 	m = glm::scale(m, vec3(0.1f, 0.1f, 0.1f));
 	planeMat = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
-	m = glm::rotate(m, planerot, vec3(1, 0, 0));
+	m = glm::rotate(m, planerot, vec3(0, 0, -1));
 	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
+	m = glm::rotate(m, 1.57f, vec3(0, 1, 0));
 	m = glm::scale(m, vec3(0.1f, 0.1f, 0.1f));
 	m = glm::scale(m, vec3(0.02f, 0.02f, 0.02f));
 	drawnList[DRAWN_PLANE].modelTransformMatrix = m;
-	m = mat4(1.0f);
-	m = glm::translate(m, vec3(15.0f, -8.0f, -44.0f));
-	m = glm::scale(m, vec3(0.8f, 1.2f, 1.0f));
-	m = glm::rotate(m, 4.712f, vec3(0, 1, 0));
-	drawnList[DRAWN_STAR].modelTransformMatrix = m;
+	//m = glm::scale(m, vec3(1.0f, 1.0f, 1.0f));
+	//m = glm::rotate(m, 4.712f, vec3(0, 1, 0));
+	//drawnList[DRAWN_BLACKHOLE].modelTransformMatrix = m;
 }
 
 void computeAllDrawnObj() {
@@ -842,14 +842,14 @@ void paintGL(void)
 	newtime = glutGet(GLUT_ELAPSED_TIME);
 	deltatime = newtime - oldtime;
 	double delta = deltatime / 1000.0;
-	for (int i = 0; i < noofstar; i++)starstate[i].life--;
+	//for (int i = 0; i < noofstar; i++)starstate[i].life--;
 	vec3 planepos;
 	//mouse rotate camera (dx and dy takes value from passive mouse function)
 	if (planeview == 1) {
 		mat4 m = mat4(1.0f);
 		m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
-		m = glm::rotate(m, planerot, vec3(1, 0, 0));
-		m = glm::translate(m, vec3(0.0f, planeradius+1.0f, -2.0f));
+		m = glm::rotate(m, planerot, vec3(0, 0, -1));
+		m = glm::translate(m, vec3(-3.0f, planeradius+1.0f, 0.0f));
 		vec4 planepostmp = m * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		planepos = vec3(planepostmp);
 	}
@@ -870,10 +870,10 @@ void paintGL(void)
 			viewMatrix = glm::lookAt(vec3(lx, ly, lz), vec3(lx, ly, lz) + direction, up);
 			if (planeview == 1) {
 				mat4 m = mat4(1.0f);
-				m = glm::rotate(mat4(1.0f), planerot, vec3(1, 0, 0));
+				m = glm::rotate(mat4(1.0f), planerot, vec3(0, 0, -1));
 				vec4 unnormup = m * vec4(0, 1, 0, 1);
 				vec3 upp = glm::normalize(vec3(unnormup));//glm::normalize(planepos - vec3(-15.0f, -5.0f, -32.0f));
-				vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), upp);
+				vec3 directionp = glm::cross(vec3(0.0f, 0.0f, planerot), upp);
 				viewMatrix = glm::lookAt(planepos, planepos + direction + directionp, normalize(up + upp));
 			}
 			//viewMatrix2 = glm::lookAt(glm::vec3(0, 0, 0), direction, up);
@@ -889,10 +889,10 @@ void paintGL(void)
 		viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), vec3(lx, ly, lz) + direction, up);
 		if (planeview == 1) {
 			mat4 m = mat4(1.0f);
-			m = glm::rotate(mat4(1.0f), planerot, vec3(1, 0, 0));
+			m = glm::rotate(mat4(1.0f), planerot, vec3(0, 0, -1));
 			vec4 unnormup = m * vec4(0,1,0,1);
 			vec3 upp = glm::normalize(vec3(unnormup));//glm::normalize(planepos - vec3(-15.0f, -5.0f, -32.0f));
-			vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), upp);
+			vec3 directionp = glm::cross(vec3(0.0f, 0.0f, planerot), -upp);
 			viewMatrix = glm::lookAt(planepos, planepos + directionp, upp);
 		}
 	}
@@ -961,6 +961,7 @@ void paintGL(void)
 
 	bool normalMapping_flag = false;
 	bool multiMapping_flag = false;
+	bool envMapping_flag = false;
 
 	//fog_flag = true;
 	glUniform1i(fog_flagUniiformLocation, fog_flag);
@@ -990,7 +991,7 @@ void paintGL(void)
 	glUniform1f(sd, spe);
 
 	int i;
-	for (i = 0; i < sizeof(drawnListIndex) / sizeof(drawnListIndex[0]); i++) {
+	for (i = 0; i < sizeof(drawnListIndex) / sizeof(drawnListIndex[0])-1; i++) {
 		DrawnObj o = drawnList[i];
 		glBindVertexArray(vao[o.vao]);
 		glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &o.modelTransformMatrix[0][0]);
@@ -999,26 +1000,32 @@ void paintGL(void)
 		case NOTXT:
 			glUniform1i(normalMapping_flagUniiformLocation, false);
 			glUniform1i(multiMapping_flagUniiformLocation, false);
+			glUniform1i(envMapping_flagUniiformLocation, false);
 			break;
 		case SIGTXT:
 			glUniform1i(normalMapping_flagUniiformLocation, false);
 			glUniform1i(multiMapping_flagUniiformLocation, false);
+			glUniform1i(envMapping_flagUniiformLocation, false);
 			glUniform1i(textureID, o.texture);
 			break;
 		case MULTXT:
 			glUniform1i(normalMapping_flagUniiformLocation, false);
 			glUniform1i(multiMapping_flagUniiformLocation, true);
+			glUniform1i(envMapping_flagUniiformLocation, false);
 			glUniform1i(textureID, o.texture);
 			glUniform1i(textureID2, o.texture2);
 			break;
 		case NORMTXT:
 			glUniform1i(normalMapping_flagUniiformLocation, true);
 			glUniform1i(multiMapping_flagUniiformLocation, false);
+			glUniform1i(envMapping_flagUniiformLocation, false);
 			glUniform1i(textureID, o.texture);
 			glUniform1i(textureID2, o.norm_texture);
+		//case ENVTXT:
 		}
 		glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
 	}
+
 	if (newtime - drawtime >= 2000) {
 		drawtime = newtime;
 		//if (noofstar < 20) {
@@ -1026,7 +1033,7 @@ void paintGL(void)
 			//starstate[noofstar%20].life = 10000;
 			starstate[noofstar%20].M = planeMat;
 		//}
-		for (int i = 0; i < noofstar || i<20; i++) {
+		for (int i = 0; i < noofstar && i<20; i++) {
 			//if(starstate[i].life>)
 				DrawnObj o = drawnList[DRAWN_STAR];
 				glBindVertexArray(vao[o.vao]);
@@ -1035,12 +1042,13 @@ void paintGL(void)
 				glUniform1i(sunUniformLocation, o.isLightSource);
 				glUniform1i(normalMapping_flagUniiformLocation, false);
 				glUniform1i(multiMapping_flagUniiformLocation, false);
+				glUniform1i(envMapping_flagUniiformLocation, false);
 				glUniform1i(textureID, o.texture);
 				//drawnList[DRAWN_STAR].modelTransformMatrix = drawnList[DRAWN_PLANE].modelTransformMatrix;
 				glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
 		}
 		noofstar++;
-		noofstar %= 20;
+		//noofstar %= 20;
 	}
 
 /*#######################################################Particle###############################################*/
