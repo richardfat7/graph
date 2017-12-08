@@ -152,6 +152,8 @@ bool fog_flag = false;
 mat4 viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 mat4 viewMatrix2 = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 
+mat4 planeMat = mat4(1.0f);
+
 
 vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
 
@@ -773,7 +775,9 @@ void updateModelTransformMatrix() {
 	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
 	m = glm::rotate(m, planerot, vec3(1, 0, 0));
 	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
-	m = glm::scale(m, vec3(0.001f, 0.001f, 0.001f));
+	m = glm::scale(m, vec3(0.1f, 0.1f, 0.1f));
+	planeMat = m;
+	m = glm::scale(m, vec3(0.02f, 0.02f, 0.02f));
 	drawnList[DRAWN_PLANE].modelTransformMatrix = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(15.0f, -8.0f, -44.0f));
@@ -796,6 +800,13 @@ void SortParticles() {
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[maxnopar]);
 }
 
+struct Starstate {
+	GLint life;
+	mat4 M;
+}starstate[20];
+
+int noofstar = 0;
+
 void paintGL(void)
 {
 	updateModelTransformMatrix();
@@ -804,16 +815,18 @@ void paintGL(void)
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
 	GLint newtime, deltatime;
+	GLint drawtime = 0;
 	newtime = glutGet(GLUT_ELAPSED_TIME);
 	deltatime = newtime - oldtime;
 	double delta = deltatime / 1000.0;
+	for (int i = 0; i < noofstar; i++)starstate[i].life--;
 	vec3 planepos;
 	//mouse rotate camera (dx and dy takes value from passive mouse function)
 	if (planeview == 1) {
 		mat4 m = mat4(1.0f);
 		m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
 		m = glm::rotate(m, planerot, vec3(1, 0, 0));
-		m = glm::translate(m, vec3(0.0f, planeradius+1.0f, 0.0f));
+		m = glm::translate(m, vec3(0.0f, planeradius+1.0f, -2.0f));
 		vec4 planepostmp = m * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		planepos = vec3(planepostmp);
 	}
@@ -982,6 +995,29 @@ void paintGL(void)
 			glUniform1i(textureID2, o.norm_texture);
 		}
 		glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
+	}
+	if (newtime - drawtime >= 2000) {
+		drawtime = newtime;
+		//if (noofstar < 20) {
+			//noofstar;
+			//starstate[noofstar%20].life = 10000;
+			starstate[noofstar%20].M = planeMat;
+		//}
+		for (int i = 0; i < noofstar || i<20; i++) {
+			//if(starstate[i].life>)
+				DrawnObj o = drawnList[DRAWN_STAR];
+				glBindVertexArray(vao[o.vao]);
+				//starstate[i].M = glm::translate(starstate[i].M, vec3(0, 0, -10));
+				glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &starstate[i].M[0][0]);
+				glUniform1i(sunUniformLocation, o.isLightSource);
+				glUniform1i(normalMapping_flagUniiformLocation, false);
+				glUniform1i(multiMapping_flagUniiformLocation, false);
+				glUniform1i(textureID, o.texture);
+				//drawnList[DRAWN_STAR].modelTransformMatrix = drawnList[DRAWN_PLANE].modelTransformMatrix;
+				glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
+		}
+		noofstar++;
+		noofstar %= 20;
 	}
 
 /*#######################################################Particle###############################################*/
