@@ -354,8 +354,14 @@ void keyboard(unsigned char key, int x, int y)
 	//if (key == 't')red -= 0.5f;
 	//if (key == 'y')yel += 0.5f;
 	//if (key == 'u')yel -= 0.5f;
-	if (key == 'i')gre += 0.5f;
-	if (key == 'o')gre -= 0.5f;
+	//if (key == 'i')gre += 0.5f;
+	//if (key == 'o')gre -= 0.5f;
+
+	if (key == 'i') lz = lz - 0.5f;
+	if (key == 'k') lz = lz + 0.5f;
+	if (key == 'j') lx = lx - 0.5f;
+	if (key == 'l') lx = lx + 0.5f;
+	//carz = carz - 0.3f * sin(carangle);
 	eyePosition = vec3(lx, ly, lz);
 }
 
@@ -846,7 +852,7 @@ void generateAllPartical(int pp) {
 		p.selfRotW = 0.03f + 0.3f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 
 		p.size = 0.1f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		p.radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.radius = 30.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 		p.pos = vec3(sin(p.angle) * p.radius, 0.0f, cos(p.angle) * p.radius);
 
 	}

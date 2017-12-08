@@ -33,7 +33,7 @@ void main()
 	if(fog_flag == true){
 		float fogDen = 0.02f;
 		float fogGrad = 2.0f;
-		float distance = length(viewMatrix * new_position);
+		float distance = length(viewMatrix * new_position) ;
 		visibility = exp ( -pow ((distance * fogDen), fogGrad ));
 		visibility = clamp (visibility , 0 ,1);
 	}
