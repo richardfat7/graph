@@ -22,7 +22,7 @@ void main(){
 		float fogGrad = 2.0f;
 		float distance = length(view * M * vec4(TexCoords, 1.0f));
 		visibility = exp ( -pow ((distance * fogDen), fogGrad ));
-		visibility = clamp (visibility , 0 ,1);
+		visibility = clamp (visibility , 0.2 ,1);
 	}
 
 }
