@@ -145,6 +145,7 @@ size_t drawSize[MAXOBJ + 1];
 GLuint vao[MAXOBJ], vaoSkybox, texture[MAXTEXTURE + 1];
 GLuint ppvbo;
 GLuint oldtime = 0;
+GLint drawtime = 0;
 GLfloat xangle = 3.14f, yangle = 0.0f;
 int d_num = 0, s_num = 0, viewcon = -1, roty_press_num = 0, rotz = -1, planeview = -1;
 float rotz_press_num = 0.0f;
@@ -157,6 +158,8 @@ float fov = 1.2f;
 int justenter = 0;
 int fog_flag = false;
 
+vec3 eyePosition(0.0f, 0.0f, 0.0f);
+
 mat4 viewMatrix = glm::lookAt(glm::vec3(lx, ly, lz), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 mat4 viewMatrix2 = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 
@@ -168,12 +171,15 @@ vec3 fog_Color = vec3(0.0f, 0.5f, 1.0f);
 
 // GLUI Control
 
-GLUI_Panel *panelV, *panelVP, *panelF;
+GLUI_Panel *panelV, *panelVP, *panelF, *panelR;
 GLUI_RadioGroup *rg, *rg2;
 
 float planespeed = 0.1f;
 int viewpointChoice = 0;
 int fog_ColorChoice = 0;
+int generateRock = 1;
+int haveColl = 0;
+float rockps = 100.0f;
 
 struct Particle {
 	vec3 pos;
@@ -350,6 +356,7 @@ void keyboard(unsigned char key, int x, int y)
 	//if (key == 'u')yel -= 0.5f;
 	if (key == 'i')gre += 0.5f;
 	if (key == 'o')gre -= 0.5f;
+	eyePosition = vec3(lx, ly, lz);
 }
 
 void move(int key, int x, int y)
@@ -763,9 +770,8 @@ void updateModelTransformMatrix() {
 	mat4 m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(20.0, 0.0f, -35.0f));
-	m = glm::scale(m, vec3(3.0f, 3.0f, 3.0f));
 	m = glm::rotate(m, rotz_press_num*0.001f, vec3(0.1, 1, 0));
-	m = glm::translate(m, vec3(0.0f, 0.0f, 0.0f));
+	m = glm::scale(m, vec3(3.0f, 3.0f, 3.0f));
 	drawnList[DRAWN_SUN].modelTransformMatrix = m;
 	m = mat4(1.0f);/*
 	m = glm::translate(m, vec3(-25.0, -5.0f, -38.0f));
@@ -823,6 +829,30 @@ void SortParticles() {
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[maxnopar]);
 }
 
+void generateAllPartical(int pp) {
+
+	int newparticles = pp;
+	//if (newparticles > (int)(0.005f*3000.0))newparticles = (int)(0.005f*3000.0);
+
+	for (int i = 0; i<newparticles; i++) {
+		int particleIndex = FindUnusedParticle();
+		Particle& p = ParticlesContainer[particleIndex]; // shortcut
+		p.life = 100.0f;
+		//ParticlesContainer[particleIndex].pos = vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
+		p.cameradistance = 1.0f;
+		p.angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.w = 0.001f + 0.05f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.selfRotW = 0.03f + 0.3f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+
+		p.size = 0.1f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		p.pos = vec3(sin(p.angle) * p.radius, 0.0f, cos(p.angle) * p.radius);
+
+	}
+
+}
+
 struct Starstate {
 	GLint life;
 	mat4 M;
@@ -838,11 +868,10 @@ void paintGL(void)
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
 	GLint newtime, deltatime;
-	GLint drawtime = 0;
 	newtime = glutGet(GLUT_ELAPSED_TIME);
 	deltatime = newtime - oldtime;
 	double delta = deltatime / 1000.0;
-	//for (int i = 0; i < noofstar; i++)starstate[i].life--;
+	for (int i = 0; i < noofstar % 20; i++)starstate[i].life--;
 	vec3 planepos;
 	//mouse rotate camera (dx and dy takes value from passive mouse function)
 	if (planeview == 1) {
@@ -852,6 +881,7 @@ void paintGL(void)
 		m = glm::translate(m, vec3(-3.0f, planeradius+1.0f, 0.0f));
 		vec4 planepostmp = m * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		planepos = vec3(planepostmp);
+		eyePosition = planepos;
 	}
 	if (viewcon == 1) {
 		xcen = vp[2] / 2;
@@ -900,7 +930,7 @@ void paintGL(void)
 	oldtime = newtime;
 	//if (rotz == 1)
 		rotz_press_num += deltatime / 10.0f;
-	planerot+=planespeed;
+	planerot+=planespeed * deltatime / 100.f;
 	//lightbox movement
 	lightboxx = 0.0;
 	lightboxy = sin(oldtime/1000.0f)*40.0f + 10.0f;
@@ -957,7 +987,6 @@ void paintGL(void)
 	//printf("%.3f %.3f %.3f\n", carx, -0.0f ,carz);
 	vec3 lightPositiony(-4.0, 9.7f, -22.0f);
 	vec3 lightPositiong(-4.0, 9.4f, -22.0f);
-	vec3 eyePosition(0.0f, 0.0f, 0.0f);
 
 	bool normalMapping_flag = false;
 	bool multiMapping_flag = false;
@@ -976,6 +1005,7 @@ void paintGL(void)
 	glUniform3fv(lightPositionrUniformLocation, 1, &lightPositionr[0]);
 	glUniform3fv(lightPositionyUniformLocation, 1, &lightPositiony[0]);
 	glUniform3fv(lightPositiongUniformLocation, 1, &lightPositiong[0]);
+	glUniform3fv(eyePositionUniformLocation, 1, &eyePosition[0]);
 	if (ddd > 0.5)ddd = 0.5;
 	if (ddd < -0.0)ddd = 0.0;
 	if (red > 0.5)red = 0.5;
@@ -1026,82 +1056,128 @@ void paintGL(void)
 		glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
 	}
 
-	if (newtime - drawtime >= 2000) {
+	//Drawn black hole
+	glBindVertexArray(vao[VAO_PLANET]);
+	mat4 bm = mat4(1.0f);
+	bm = glm::translate(bm, vec3(3.0f, -2.0f, -27.0f));
+	bm = glm::rotate(bm, 0.0f, vec3(0, 1, 0));
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &bm[0][0]);
+	glUniform1i(sunUniformLocation, false);
+	glUniform1i(normalMapping_flagUniiformLocation, false);
+	glUniform1i(multiMapping_flagUniiformLocation, false);
+	glUniform1i(envMapping_flagUniiformLocation, true);
+	glUniform1i(glGetUniformLocation(commonProgram, "cube_texture"), 10);
+	glUniform1i(textureID, GL_TEXTURE10);
+	glDrawArrays(GL_TRIANGLES, 0, drawSize[VAO_PLANET]);
+
+
+	if (newtime - drawtime >= 200) {
 		drawtime = newtime;
 		//if (noofstar < 20) {
-			//noofstar;
-			//starstate[noofstar%20].life = 10000;
-			starstate[noofstar%20].M = planeMat;
+		//noofstar;
+		//starstate[noofstar%20].life = 10000;
+		starstate[noofstar % 20].M = planeMat;
 		//}
-		for (int i = 0; i < noofstar && i<20; i++) {
-			//if(starstate[i].life>)
-				DrawnObj o = drawnList[DRAWN_STAR];
-				glBindVertexArray(vao[o.vao]);
-				//starstate[i].M = glm::translate(starstate[i].M, vec3(0, 0, -10));
-				glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &starstate[i].M[0][0]);
-				glUniform1i(sunUniformLocation, o.isLightSource);
-				glUniform1i(normalMapping_flagUniiformLocation, false);
-				glUniform1i(multiMapping_flagUniiformLocation, false);
-				glUniform1i(envMapping_flagUniiformLocation, false);
-				glUniform1i(textureID, o.texture);
-				//drawnList[DRAWN_STAR].modelTransformMatrix = drawnList[DRAWN_PLANE].modelTransformMatrix;
-				glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
-		}
 		noofstar++;
 		//noofstar %= 20;
 	}
+	for (int i = 0; i < noofstar && i<20; i++) {
+		//if(starstate[i].life>)
+		DrawnObj o = drawnList[DRAWN_STAR];
+		glBindVertexArray(vao[o.vao]);
+		//starstate[i].M = glm::translate(starstate[i].M, vec3(0, 0, -10));
+		glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &starstate[i].M[0][0]);
+		glUniform1i(sunUniformLocation, o.isLightSource);
+		glUniform1i(normalMapping_flagUniiformLocation, false);
+		glUniform1i(multiMapping_flagUniiformLocation, false);
+		glUniform1i(envMapping_flagUniiformLocation, false);
+		glUniform1i(textureID, o.texture);
+		//drawnList[DRAWN_STAR].modelTransformMatrix = drawnList[DRAWN_PLANE].modelTransformMatrix;
+		glDrawArrays(GL_TRIANGLES, 0, drawSize[o.vao]);
+	}
+
 
 /*#######################################################Particle###############################################*/
 
 	glUseProgram(instanceProgram);
+	glUniform3fv(i_eyePositionUniformLocation, 1, &eyePosition[0]);
 	GLuint i_viewMatrixUniformLocation = glGetUniformLocation(instanceProgram, "viewMatrix");
 	glUniformMatrix4fv(i_viewMatrixUniformLocation, 1, GL_FALSE, &viewMatrix[0][0]);
 	GLuint i_projectionMatrixUniformLocation = glGetUniformLocation(instanceProgram, "projectionMatrix");
 	glUniformMatrix4fv(i_projectionMatrixUniformLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
 	glBindVertexArray(vao[VAO_PARTICAL]);
 	mat4 i_modelTransformMatrix = glm::mat4(1.0f);
-	i_modelTransformMatrix = glm::translate(i_modelTransformMatrix, vec3(20.0, 0.0f, -35.0f));
+	i_modelTransformMatrix = glm::translate(i_modelTransformMatrix, vec3(3.0f, -2.0f, -27.0f));
 	GLuint i_modelTransformMatrixUniformLocation = glGetUniformLocation(instanceProgram, "modelTransformMatrix");
 	glUniformMatrix4fv(i_modelTransformMatrixUniformLocation, 1, GL_FALSE, &i_modelTransformMatrix[0][0]);
 
 	glUniform1i(i_fog_flagUniiformLocation, fog_flag);
 	glUniform3fv(i_fog_ColorUniiformLocation, 1, &fog_Color[0]);
-
+	if (generateRock)
+		generateAllPartical((int)(deltatime / 1000.0f * rockps));
 	// Simulate all particles
+	if (haveColl) {
+		for (int i = 0; i < maxnopar; i++) {
+			if (ParticlesContainer[i].cameradistance <= 0.0f)
+				continue;
+			for (int j = i + 1; j < maxnopar; j++) {
+				if (ParticlesContainer[j].cameradistance <= 0.0f)
+					continue;
+				if (glm::distance(ParticlesContainer[i].pos, ParticlesContainer[j].pos) < 3.7 * (ParticlesContainer[i].size + ParticlesContainer[j].size)) {
+					//printf("%d %d\n", i, j);
+					ParticlesContainer[i].cameradistance = 0.0f;
+					ParticlesContainer[j].cameradistance = 0.0f;
+				}
+			}
+		}
+	}
+
 	int parcnt = 0;
 	for (int i = 0; i<maxnopar; i++) {
 
 		Particle& p = ParticlesContainer[i]; // shortcut
-
 		//if (p.life > 0.0f) {
 
 		//	// Decrease life
 		//	p.life -= delta;
 		//	if (p.life > 0.0f) {
 
-				// Simulate simple physics : gravity only, no collisions
-				p.angle += p.w * (float)delta;
-				p.selfRotAngle += p.selfRotW * (float)delta;
-				p.pos = vec3(sin(p.angle) * p.radius, 0.0f, cos(p.angle) * p.radius);
-				p.cameradistance = glm::length(p.pos - eyePosition);
-				//ParticlesContainer[i].pos += vec3(0.0f,10.0f, 0.0f) * (float)delta;
+		if (p.cameradistance <= 0.0f) {
+			p.w = 0.0f;
+			p.selfRotAngle += p.selfRotW * (float)delta;
+			float dist = glm::distance(p.pos, vec3(0.0f, 0.0f, 0.0f));
+			if (dist > 4.0f)
+				p.pos = p.pos / dist * (dist - 10.0f * deltatime / 1000.0f);
+			else {
+				p.pos = vec3(0.0f, 0.0f, 0.0f);
+				p.life = -1.0f;
+				continue;
+			}
+		}
+		else {
+			// Simulate simple physics : gravity only, no collisions
+			p.angle += p.w * (float)delta;
+			p.selfRotAngle += p.selfRotW * (float)delta;
+			p.pos = vec3(sin(p.angle) * p.radius, 0.0f, cos(p.angle) * p.radius);
+			//p.cameradistance = glm::length(p.pos - eyePosition);
+			//ParticlesContainer[i].pos += vec3(0.0f,10.0f, 0.0f) * (float)delta;
 
-				mat4 m = mat4(1.0f);
-				m = glm::translate(m, p.pos);
-				//m = glm::translate(m, vec3(-25.0, -5.0f, -40.0f));
-				m = glm::scale(m, vec3(p.size));
-				m = glm::rotate(m, p.selfRotAngle, vec3(-0.4, 1, 0));
+		}
+		mat4 m = mat4(1.0f);
+		m = glm::translate(m, p.pos);
+		//m = glm::translate(m, vec3(-25.0, -5.0f, -40.0f));
+		m = glm::scale(m, vec3(p.size));
+		m = glm::rotate(m, p.selfRotAngle, vec3(-0.4, 1, 0.0));
 
-				// Fill the GPU buffer
-				g_par_position_size_data[parcnt] = m;
+		// Fill the GPU buffer
+		g_par_position_size_data[parcnt] = m;
 
-			//}
-			//else {
-			//	// Particles that just died will be put at the end of the buffer in SortParticles();
-			//	p.cameradistance = -1.0f;
-			//}
-
-			parcnt++;
+		//}
+		//else {
+		//	// Particles that just died will be put at the end of the buffer in SortParticles();
+		//	p.cameradistance = -1.0f;
+		//}
+		parcnt++;
 /*
 		}*/
 	}
@@ -1136,27 +1212,6 @@ void paintGL(void)
 	glutPostRedisplay();
 }
 
-void generateAllPartical() {
-
-	int newparticles = (int)(MAXPP);
-	//if (newparticles > (int)(0.005f*3000.0))newparticles = (int)(0.005f*3000.0);
-
-	for (int i = 0; i<newparticles; i++) {
-		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = 100.0f;
-		//ParticlesContainer[particleIndex].pos = vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
-
-		ParticlesContainer[particleIndex].angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].w = 0.01f + 0.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].selfRotW = 0.03f + 0.3f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-
-		ParticlesContainer[particleIndex].size = 0.05f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-
-	}
-
-}
 
 void initializedGL(void)
 {
@@ -1170,7 +1225,7 @@ void initializedGL(void)
 	sendDataToOpenGL();
 	getAllUniformLocation();
 	computeAllDrawnObj();
-	generateAllPartical();
+	generateAllPartical(5000);
 }
 
 /**************************************** myGlutReshape() *************/
@@ -1215,6 +1270,7 @@ void gluiCallback(int id) {
 			lz = -20.0f;
 			xangle = 0.0f, yangle = -1.72f;
 		}
+		eyePosition = vec3(lx, ly, lz);
 		break;
 	case RG_FOGCOLOR:
 		i = rg2->get_int_val();
@@ -1308,6 +1364,10 @@ int main(int argc, char *argv[])
 	glui->add_radiobutton_to_group(rg2, "Sky Blue");
 	glui->add_radiobutton_to_group(rg2, "Sad Grey");
 	glui->add_radiobutton_to_group(rg2, "Posion Purple");
+	panelR = glui->add_panel("Astroid Control", 1);
+	glui->add_checkbox_to_panel(panelR, "Enable generation", &generateRock);
+	glui->add_checkbox_to_panel(panelR, "Enable collision", &haveColl);
+	glui->add_spinner_to_panel(panelR, "Generating Speed", GLUI_SPINNER_FLOAT, &rockps)->set_float_limits(0.0f, 5000.0f, GLUI_LIMIT_CLAMP);
 	glui->set_main_gfx_window(mainWin);
 
 	glutMainLoop();

@@ -87,6 +87,17 @@ void main()
 		MatDifCol = vec4((0.8 * texture(myTextureSampler,UV) + 0.6 * texture(myTextureSampler2,UV)).rgb, 1.0f);
 	}
 
+	else if(envMapping_flag){
+	
+		vec3 lightVectorWorldb = normalize(eyePositionWorld - vertexPositionWorld);
+		vec3 reflectedLightVectorWorldb = reflect (-lightVectorWorldb, normal);
+		vec3 reflectedLightVectorWorldbout = reflect (lightVectorWorldb, normal);
+		vec3 eyeVectorWorld = normalize (eyePositionWorld - vertexPositionWorld);
+		float SpeBrightness = clamp(dot(reflectedLightVectorWorldb, eyeVectorWorld), 0 ,1);
+		float SpeBrightnessout = clamp(dot(reflectedLightVectorWorldbout, eyeVectorWorld), 0 ,1);
+		finalColor = vec4(texture(cube_texture, normal).rgb, 1.0f) + vec4(-1.0f, -1.0f, -1.0f, 1.0f) * pow(SpeBrightness,1) + vec4(1.0f, 1.0f, 1.0f, 1.0f) * pow(SpeBrightnessout,15);
+	}
+
 	else{
 		MatAmbCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);
 		MatDifCol = vec4(texture(myTextureSampler,UV).rgb, 1.0f);

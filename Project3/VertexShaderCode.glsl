@@ -20,8 +20,8 @@ out mat4 viewMatrix2;
 void main()
 {
 	vec4 v = vec4(position, 1.0);
-	vec4 new_position =  modelTransformMatrix * v;
-	vec4 projected_position = projectionMatrix * viewMatrix * new_position;
+	vec4 new_position = modelTransformMatrix * v;
+	vec4 projected_position = projectionMatrix * viewMatrix *  new_position;
 	gl_Position = projected_position;
 
 	vec4 normal_temp = modelTransformMatrix * vec4(normal,0);

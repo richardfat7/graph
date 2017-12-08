@@ -1,7 +1,7 @@
 ﻿Basic Requirements:
 You should accomplish the following goals to get the basic points.
 
-- [ ] Create 3 planets (A, B, C), 1 light source box (E) and 1 space vehicle (D), and place them properly. Keep the
+- [X] Create 3 planets (A, B, C), 1 light source box (E) and 1 space vehicle (D), and place them properly. Keep the
 aspect ratio of the scene correct when we change the window size with “glutReshapeFunc” function. You can
 load any possible objects or images as your planets, vehicle.
 
@@ -36,21 +36,19 @@ choices so that we can explore your Universe from different aspects.
 
 - [X] Fog effect. Fill the whole universe with fog. When we move around, we should be able to experience the
 
-- [ ] Graphical User Interface. A GUI should be created with the GLUI Library (similar as the figure shows)
+- [X] Graphical User Interface. A GUI should be created with the GLUI Library (similar as the figure shows)
 which includes the module:
 (a) A spinner to control the speed of vehicle.
 (b) A radio group to set viewpoint.
 (c) A checkbox to turn on/off fog effect, a radio group to set fog color.
 
-- [ ] For interaction:
+- [X] For interaction:
 a) Keyboard. Please set lower case ‘a’, ‘s’, ‘d’ as switch between 3 different viewpoints.
 b) Real-time speed and orbit control. Please set the up and down arrow keys to control the speed of the
 space vehicle. Left and right arrow keys to increase/decrease the orbit radius size of the space vehicle.
 c) Mouse. Please make the setting so that we can zoom in/out when we use the middle wheel of mouse.
 Control the position of camera by mouse (same as assignment 2) so that we can move around your
-universe
-different fog density and visibility, shown as figures. Fog color should be able to be changed in GUI part.
-
+universe  
 
 
 
@@ -60,7 +58,7 @@ summation property of the Phong Illumination Model. (4 points)
 - [ ] 2. Collision Detection. Detect the collision between any two objects. Once the collision happens, disable the
 rendering of one object to make it disappear. You can choose Landmark distance/Bounding
 box/Bounding sphere. (Marking depends on the elegance of your algorithm. Full mark is 6 points)
-- [X ] 3. Provide extra viewpoints on the space vehicle. By doing this, we can really enjoy our space travel and
+- [X] 3. Provide extra viewpoints on the space vehicle. By doing this, we can really enjoy our space travel and
 have a close touch with the planet and floating rocks. (4 points)
 - [X] 4. Represent the real-time trajectory of space vehicle D with a string of stars (F). You need to record and
 update several real-time positions of the vehicle and render stars on those positions. Shown as the
