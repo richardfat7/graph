@@ -65,7 +65,7 @@ have a close touch with the planet and floating rocks. (4 points)
 [ ]4. Represent the real-time trajectory of space vehicle D with a string of stars (F). You need to record and
 update several real-time positions of the vehicle and render stars on those positions. Shown as the
 following figure. (5 points)
-[ ]5. Generate the asteroid ring cloud with more than 5000 floating rocks. Some basic generation method will
+[X]5. Generate the asteroid ring cloud with more than 5000 floating rocks. Some basic generation method will
 becomes un-renderable as so many repeated objects need to be rendered at the same time. So you are
 encouraged to explore the amazing instanced rendering. Code of instancing will be checked during
  demonstration. (6 points)

@@ -360,7 +360,7 @@ void MouseWheel(int button, int state, int x, int y) {
 	if (button == 3 || button == 4) {
 		if (state == GLUT_DOWN) {
 			if (button == 3) fov = max(0.1f, fov - 0.05f);
-			else fov = min(2.5f, fov + 0.05f);
+			else fov = min(3.0f, fov + 0.05f);
 		}
 	}
 }
@@ -756,7 +756,7 @@ void updateModelTransformMatrix() {
 	m = glm::rotate(m, 0.5f, vec3(0, 0, 1));
 	m = glm::rotate(m, -1.72f, vec3(1, 0, 0));
 	m = glm::rotate(m, rotz_press_num*0.005f, vec3(0, 0, 1));
-	m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
+	m = glm::translate(m, vec3(0.0f, -1.0f, 0.0f));
 	drawnList[DRAWN_EARTH].modelTransformMatrix = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(0.0f, 0.0f, -10.0f));
@@ -764,7 +764,7 @@ void updateModelTransformMatrix() {
 	m = glm::scale(m, vec3(3.0f, 3.0f, 3.0f));
 	drawnList[DRAWN_LIGHTBOX].modelTransformMatrix = m;
 	m = mat4(1.0f);
-	m = glm::translate(m, vec3(-15.0f, -5.0f, -32.0f));
+	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
 	m = glm::rotate(m, planerot, vec3(1, 0, 0));
 	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
 	m = glm::scale(m, vec3(0.001f, 0.001f, 0.001f));
@@ -805,9 +805,9 @@ void paintGL(void)
 	//mouse rotate camera (dx and dy takes value from passive mouse function)
 	if (planeview == 1) {
 		mat4 m = mat4(1.0f);
-		m = glm::translate(m, vec3(-15.0f, -5.0f, -32.0f));
+		m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
 		m = glm::rotate(m, planerot, vec3(1, 0, 0));
-		m = glm::translate(m, vec3(0.0f, planeradius+1.0f, -1.0f));
+		m = glm::translate(m, vec3(0.0f, planeradius+1.0f, 0.0f));
 		vec4 planepostmp = m * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		planepos = vec3(planepostmp);
 	}
@@ -827,9 +827,12 @@ void paintGL(void)
 			vec3 up = glm::cross(right1, direction);
 			viewMatrix = glm::lookAt(vec3(lx, ly, lz), vec3(lx, ly, lz) + direction, up);
 			if (planeview == 1) {
-				vec3 upp = glm::normalize(planepos - vec3(-15.0f, -5.0f, -32.0f));
-				vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), up);
-				viewMatrix = glm::lookAt(planepos, planepos + direction + directionp, up + upp);
+				mat4 m = mat4(1.0f);
+				m = glm::rotate(mat4(1.0f), planerot, vec3(1, 0, 0));
+				vec4 unnormup = m * vec4(0, 1, 0, 1);
+				vec3 upp = glm::normalize(vec3(unnormup));//glm::normalize(planepos - vec3(-15.0f, -5.0f, -32.0f));
+				vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), upp);
+				viewMatrix = glm::lookAt(planepos, planepos + direction + directionp, normalize(up + upp));
 			}
 			//viewMatrix2 = glm::lookAt(glm::vec3(0, 0, 0), direction, up);
 			glutWarpPointer(xcen, ycen);
@@ -847,7 +850,7 @@ void paintGL(void)
 			m = glm::rotate(mat4(1.0f), planerot, vec3(1, 0, 0));
 			vec4 unnormup = m * vec4(0,1,0,1);
 			vec3 upp = glm::normalize(vec3(unnormup));//glm::normalize(planepos - vec3(-15.0f, -5.0f, -32.0f));
-			vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), up);
+			vec3 directionp = glm::cross(vec3(planerot, 0.0f, 0.0f), upp);
 			viewMatrix = glm::lookAt(planepos, planepos + directionp, upp);
 		}
 	}
