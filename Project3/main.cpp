@@ -28,6 +28,7 @@ using glm::mat4;
 #define MAXOBJ				6
 #define MAXTEXTURE			10
 #define MAXDRAWNOBJ			6
+#define MAXPP				5000
 
 #define VAO_PLANET			0
 #define VAO_ROCK			1
@@ -137,7 +138,8 @@ GLuint vao[MAXOBJ], vaoSkybox, texture[MAXTEXTURE + 1];
 GLuint ppvbo;
 GLuint oldtime = 0;
 GLfloat xangle = 3.14f, yangle = 0.0f;
-int d_num = 0, s_num = 0, viewcon = -1, rotz_press_num = 0, roty_press_num = 0, rotz = -1, planeview = -1;
+int d_num = 0, s_num = 0, viewcon = -1, roty_press_num = 0, rotz = -1, planeview = -1;
+float rotz_press_num = 0.0f;
 int xpos, ypos, xcen, ycen;
 float xx = 1.0, lx = 0.0f, ly = 3.0f, lz = 10.0f, carx = 0.0f, carz = 0.0f, carangle = 0.0f, a=0.0f,b=0.0f,c=0.0f;
 float lightboxx = 0.0, lightboxy = 0.0, lightboxz = 0.0;
@@ -166,7 +168,7 @@ struct Particle {
 	}
 };
 
-const int maxnopar = 3000;
+const int maxnopar = MAXPP;
 Particle ParticlesContainer[maxnopar];
 static mat4* g_par_position_size_data = new mat4[maxnopar];
 
@@ -756,7 +758,7 @@ void updateModelTransformMatrix() {
 	m = glm::rotate(m, 0.5f, vec3(0, 0, 1));
 	m = glm::rotate(m, -1.72f, vec3(1, 0, 0));
 	m = glm::rotate(m, rotz_press_num*0.005f, vec3(0, 0, 1));
-	m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
+	//m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
 	drawnList[DRAWN_EARTH].modelTransformMatrix = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(0.0f, 0.0f, -10.0f));
@@ -853,7 +855,8 @@ void paintGL(void)
 	}
 	//planet movement
 	oldtime = newtime;
-	if (rotz == 1)rotz_press_num++;
+	//if (rotz == 1)
+		rotz_press_num += deltatime / 10.0f;
 	planerot+=planespeed;
 	//lightbox movement
 	lightboxx = 0.0;
@@ -987,24 +990,6 @@ void paintGL(void)
 	GLuint i_modelTransformMatrixUniformLocation = glGetUniformLocation(instanceProgram, "modelTransformMatrix");
 	glUniformMatrix4fv(i_modelTransformMatrixUniformLocation, 1, GL_FALSE, &i_modelTransformMatrix[0][0]);
 
-	int newparticles = (int)(delta*3000.0);
-	if (newparticles > (int)(0.005f*3000.0))newparticles = (int)(0.005f*3000.0);
-
-	for (int i = 0; i<newparticles; i++) {
-		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = 100.0f; 
-		//ParticlesContainer[particleIndex].pos = vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
-
-		ParticlesContainer[particleIndex].angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].w = 0.01f + 0.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].selfRotW = 0.01f + 0.1f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-
-		ParticlesContainer[particleIndex].size = 0.05f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		ParticlesContainer[particleIndex].radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-
-	}
-
 	// Simulate all particles
 	int parcnt = 0;
 	for (int i = 0; i<maxnopar; i++) {
@@ -1074,6 +1059,28 @@ void paintGL(void)
 	glutPostRedisplay();
 }
 
+void generateAllPartical() {
+
+	int newparticles = (int)(MAXPP);
+	//if (newparticles > (int)(0.005f*3000.0))newparticles = (int)(0.005f*3000.0);
+
+	for (int i = 0; i<newparticles; i++) {
+		int particleIndex = FindUnusedParticle();
+		ParticlesContainer[particleIndex].life = 100.0f;
+		//ParticlesContainer[particleIndex].pos = vec3((rand() % 2000 - 1000) / 50.0f, 10, -30.0f + (rand() % 2000 - 1000.0f) / 50.0f);
+
+		ParticlesContainer[particleIndex].angle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].selfRotAngle = 6.28f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].w = 0.01f + 0.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].selfRotW = 0.01f + 0.1f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+
+		ParticlesContainer[particleIndex].size = 0.05f + 0.5f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+		ParticlesContainer[particleIndex].radius = 45.0f + 30.0f * (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+
+	}
+
+}
+
 void initializedGL(void)
 {
 	glewInit();
@@ -1086,6 +1093,7 @@ void initializedGL(void)
 	sendDataToOpenGL();
 	getAllUniformLocation();
 	computeAllDrawnObj();
+	generateAllPartical();
 }
 
 int main(int argc, char *argv[])

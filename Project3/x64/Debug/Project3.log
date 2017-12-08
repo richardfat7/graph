@@ -1,13 +1,12 @@
 ﻿  main.cpp
-c:\users\hei\documents\graph\project3\main.cpp(642): warning C4101: 'vboID4': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(642): warning C4101: 'vboID0': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(642): warning C4101: 'vboID3': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(642): warning C4101: 'vboID2': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(642): warning C4101: 'vboID1': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(896): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(974): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1017): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1069): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
-  Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.exe
-  Project3.vcxproj -> C:\Users\Hei\Documents\graph\x64\Debug\Project3.pdb (Partial PDB)
+c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID4': unreferenced local variable
+c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID0': unreferenced local variable
+c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID3': unreferenced local variable
+c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID2': unreferenced local variable
+c:\github\graph\project3\main.cpp(644): warning C4101: 'vboID1': unreferenced local variable
+c:\github\graph\project3\main.cpp(899): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(977): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\github\graph\project3\main.cpp(1002): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+c:\github\graph\project3\main.cpp(1054): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.exe
+  Project3.vcxproj -> C:\github\graph\x64\Debug\Project3.pdb (Partial PDB)
