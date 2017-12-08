@@ -746,11 +746,15 @@ void updateModelTransformMatrix() {
 	m = glm::rotate(m, rotz_press_num*0.001f, vec3(0.1, 1, 0));
 	m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
 	drawnList[DRAWN_SUN].modelTransformMatrix = m;
-	m = mat4(1.0f);
+	m = mat4(1.0f);/*
 	m = glm::translate(m, vec3(-25.0, -5.0f, -38.0f));
 	m = glm::scale(m, vec3(0.8f, 0.8f, 0.8f));
 	m = glm::rotate(m, rotz_press_num*0.02f, vec3(-0.3, 1, 0));
-	m = glm::translate(m, vec3(25.0f, 3.0f, 0.0f));
+	m = glm::translate(m, vec3(25.0f, 3.0f, 0.0f));*/
+	m = glm::translate(m, vec3(-15.0, -5.0f, -30.0f));
+	m = glm::rotate(m, rotz_press_num*0.02f, vec3(-0.3, 1, 0));
+	m = glm::translate(m, vec3(10.0f, 0.0f, 0.0f));
+	m = glm::scale(m, vec3(0.8f, 0.8f, 0.8f));
 	drawnList[DRAWN_MOON].modelTransformMatrix = m;
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(-15.0, -5.0f, -30.0f));
