@@ -765,9 +765,9 @@ void updateModelTransformMatrix() {
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(-15.0, -5.0f, -30.0f));
 	m = glm::scale(m, vec3(1.3f, 1.3f, 1.3f));
-	m = glm::rotate(m, 0.5f, vec3(0, 0, 1));
+	m = glm::rotate(m, -0.3f, vec3(1, 0, 0));
 	m = glm::rotate(m, -1.72f, vec3(1, 0, 0));
-	m = glm::rotate(m, rotz_press_num*0.005f, vec3(0, 0, 1));
+	m = glm::rotate(m, rotz_press_num*0.005f, vec3(0, 1, 0));
 	//m = glm::translate(m, vec3(-1.0f, 0.0f, 0.0f));
 	drawnList[DRAWN_EARTH].modelTransformMatrix = m;
 	m = mat4(1.0f);
