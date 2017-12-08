@@ -11,6 +11,7 @@ Reference for particle system: http://www.opengl-tutorial.org/intermediate-tutor
 #define _CRT_SECURE_NO_WARNINGS
 #include "Dependencies\glew\glew.h"
 #include "Dependencies\freeglut\freeglut.h"
+#include "Dependencies\glui\glui.h"
 #include "Dependencies\glm\glm.hpp"
 #include "Dependencies\glm\gtc\matrix_transform.hpp"
 //#include "Dependencies\irrKlang\irrKlang.h"
@@ -1139,13 +1140,26 @@ void initializedGL(void)
 	generateAllPartical();
 }
 
+/**************************************** myGlutReshape() *************/
+
+void myGlutReshape(int x, int y)
+{
+	int tx, ty, tw, th;
+	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
+	glViewport(tx, ty, tw, th);
+
+	//xy_aspect = (float)tw / (float)th;
+
+	glutPostRedisplay();
+}
+
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 	//TODO:
 	//Create a window with title specified
-	glutCreateWindow("Assignment 2");
+	int mainWin = glutCreateWindow("Assignment 2");
 	glewInit();
 
 /*##########################Particle###############################*/
@@ -1162,6 +1176,12 @@ int main(int argc, char *argv[])
 	glutSpecialFunc(move);
 	glutPassiveMotionFunc(PassiveMouse);
 	glutMouseFunc(MouseWheel);
+
+	GLUI_Master.set_glutReshapeFunc(myGlutReshape);
+
+
+	GLUI* glui = GLUI_Master.create_glui_subwindow(mainWin, GLUI_SUBWINDOW_RIGHT);
+	glui->set_main_gfx_window(mainWin);
 
 	glutMainLoop();
 
