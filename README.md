@@ -71,7 +71,7 @@ encouraged to explore the amazing instanced rendering. Code of instancing will b
  demonstration. (6 points)
 - [ ] 6. Use more “advanced” texture mappings to make objects more realistic, such as shadow mapping
 environment mapping, displacement mapping etc. (7 points)
-- [ ] 7. Play background music with IrrKlang Library. (2 points)
+- [X] 7. Play background music with IrrKlang Library. (2 points)
 
 index		texture   
 ---------------------------------------    

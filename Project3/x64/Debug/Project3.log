@@ -1,14 +1,14 @@
 ﻿  main.cpp
 c:\users\hei\documents\graph\project3\dependencies\glui\glui.h(880): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(647): warning C4101: 'vboID4': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(647): warning C4101: 'vboID0': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(647): warning C4101: 'vboID3': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(647): warning C4101: 'vboID2': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(647): warning C4101: 'vboID1': unreferenced local variable
-c:\users\hei\documents\graph\project3\main.cpp(920): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(998): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1018): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-c:\users\hei\documents\graph\project3\main.cpp(1098): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID4': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID0': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID3': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID2': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(650): warning C4101: 'vboID1': unreferenced local variable
+c:\users\hei\documents\graph\project3\main.cpp(928): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1006): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1026): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+c:\users\hei\documents\graph\project3\main.cpp(1106): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 glui32.lib(glui.obj) : warning LNK4099: PDB '_glui library.pdb' was not found with 'glui32.lib(glui.obj)' or at 'C:\Users\Hei\Documents\graph\x64\Debug\_glui library.pdb'; linking object as if no debug info
 glui32.lib(glui_bitmaps.obj) : warning LNK4099: PDB '_glui library.pdb' was not found with 'glui32.lib(glui_bitmaps.obj)' or at 'C:\Users\Hei\Documents\graph\x64\Debug\_glui library.pdb'; linking object as if no debug info
 glui32.lib(glui_bitmap_img_data.obj) : warning LNK4099: PDB '_glui library.pdb' was not found with 'glui32.lib(glui_bitmap_img_data.obj)' or at 'C:\Users\Hei\Documents\graph\x64\Debug\_glui library.pdb'; linking object as if no debug info

@@ -14,13 +14,16 @@ Reference for particle system: http://www.opengl-tutorial.org/intermediate-tutor
 #include "Dependencies\glui\glui.h"
 #include "Dependencies\glm\glm.hpp"
 #include "Dependencies\glm\gtc\matrix_transform.hpp"
-//#include "Dependencies\irrKlang\irrKlang.h"
+#include "Dependencies\irrKlang\irrKlang.h"
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
+//#include <irrKlang.h>
 using namespace std;
+using namespace irrklang;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
@@ -775,9 +778,14 @@ void updateModelTransformMatrix() {
 	m = mat4(1.0f);
 	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
 	m = glm::rotate(m, planerot, vec3(1, 0, 0));
-	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
+	m = glm::translate(m, vec3(0.0f, planeradius, -2.0f));
 	m = glm::scale(m, vec3(0.1f, 0.1f, 0.1f));
 	planeMat = m;
+	m = mat4(1.0f);
+	m = glm::translate(m, vec3(-15.0f, -5.0f, -30.0f));
+	m = glm::rotate(m, planerot, vec3(1, 0, 0));
+	m = glm::translate(m, vec3(0.0f, planeradius, 0.0f));
+	m = glm::scale(m, vec3(0.1f, 0.1f, 0.1f));
 	m = glm::scale(m, vec3(0.02f, 0.02f, 0.02f));
 	drawnList[DRAWN_PLANE].modelTransformMatrix = m;
 	m = mat4(1.0f);
@@ -1155,6 +1163,41 @@ void myGlutReshape(int x, int y)
 
 int main(int argc, char *argv[])
 {
+	ISoundEngine* engine = createIrrKlangDevice();
+
+	if (!engine)
+	{
+		printf("Could not startup engine\n");
+		return 0; // error starting up the engine
+	}
+
+	// To play a sound, we only to call play2D(). The second parameter
+	// tells the engine to play it looped.
+
+	// play some sound stream, looped
+	engine->play2D("music/A_Sky_Full_Of_Stars.mp3", true);
+
+	// In a loop, wait until user presses 'q' to exit or another key to
+	// play another sound.
+
+	//printf("\nHello World!\n");
+
+	//do
+	//{
+		//printf("Press any key to play some sound, press 'q' to quit.\n");
+
+		// play a single sound
+		//engine->play2D("music/A_Sky_Full_Of_Stars.mp3");
+	//} while (getch() != 'q');
+
+	// After we are finished, we have to delete the irrKlang Device created earlier
+	// with createIrrKlangDevice(). Use ::drop() to do that. In irrKlang, you should
+	// delete all objects you created with a method or function that starts with 'create'.
+	// (an exception is the play2D()- or play3D()-method, see the documentation or the
+	// next example for an explanation)
+	// The object is deleted simply by calling ->drop().
+
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 	//TODO:
@@ -1184,6 +1227,7 @@ int main(int argc, char *argv[])
 	glui->set_main_gfx_window(mainWin);
 
 	glutMainLoop();
+	engine->drop(); // delete engine
 
 	return 0;
 }
